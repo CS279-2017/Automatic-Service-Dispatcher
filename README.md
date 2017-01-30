@@ -1,3 +1,5 @@
+![alt tag](https://github.com/CS279-2017/Automatic-Service-Dispatcher/blob/daily/sam_hurd/OilAndGas-PossibleLogov2.png)
+
 # Uber-style Labor Dispatch Using Remote Monitoring Data
 
 The application processes sensor data to dispatch an appropriate user if something is wrong.
