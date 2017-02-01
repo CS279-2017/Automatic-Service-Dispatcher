@@ -20,6 +20,7 @@ public interface GlowAPI {
     @POST("/accounts/android_login/")
     Call<LoginResult> getUserLogin(@Field("username")String uname, @Field("password")String password);
 
-    @GET("/2.2/questions?order=desc&sort=creation&site=stackoverflow")
-    Call<TaskList> loadQuestions(@Query("tagged") String tags);
+    //Todo: some sort of session key
+    @GET("/api/android/activetasks/")
+    Call<TaskList> loadActiveTasks();
 }

@@ -33,8 +33,7 @@ def get_active_user_tasks(request):
     user = Profile.objects.get(user=request.user)
     mytask = []
     for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
-        mytask.append({'taskId': task.pk, 'workerId': task.worker.pk, 'name': task.job.name, 'date': task.date,
-                       "sensor": task.sensor.sensorId})
+        mytask.append(task.get_json())
     return JsonResponse({'active_tasks': mytask})
 
 
@@ -43,10 +42,7 @@ def get_completed_user_tasks(request):
     user = Profile.objects.get(user=request.user)
     mytask = []
     for task in Task.objects.filter(worker=user, active=False).order_by("-date"):
-        time = (task.datecompleted-task.date)
-        hoursOpen = time.days*24+time.seconds/3600
-        mytask.append({'taskId': task.pk, 'workerId': task.worker.pk, 'name': task.job.name, 'date': task.date,
-                       "sensor": task.sensor.sensorId, "dateCompleted": task.datecompleted, "hoursOpen": hoursOpen})
+        mytask.append(task.get_json())
     return JsonResponse({'completed_tasks': mytask})
 
 
@@ -59,17 +55,13 @@ def complete_task(request):
         task.datecompleted = timezone.now()
         task.save()
         user = Profile.objects.get(user=request.user)
-        completedtask = []
+        result = {'completed_tasks': [], 'active_tasks': []}
         for task in Task.objects.filter(worker=user, active=False):
-            time = (task.datecompleted-task.date)
-            hoursOpen = time.days*24+time.seconds/3600
-            completedtask.append({'taskId': task.pk, 'workerId': task.worker.pk, 'name': task.job.name, 'date': task.date,
-                                  "sensor": task.sensor.sensorId, "dateCompleted": task.datecompleted, "hoursOpen": hoursOpen})
-        activetask = []
-        for task in Task.objects.filter(worker=user, active=True):
-            activetask.append({'taskId': task.pk, 'workerId': task.worker.pk, 'name': task.job.name, 'date': task.date,
-                               "sensor": task.sensor.sensorId})
-        return JsonResponse({'completed_tasks': completedtask, 'active_tasks': activetask})
+            if task.active:
+                result["active_tasks"].append(task.get_json())
+            else:
+                result["completed_tasks"].append(task.get_json())
+        return JsonResponse(result)
     except Task.DoesNotExist:
         return JsonResponse({"result": "error"})
 
@@ -124,8 +116,7 @@ def get_all_workers(request):
     for user in Profile.objects.filter(admin=False):
         tasklist = []
         for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
-            tasklist.append({'taskId': task.pk, 'name': task.job.name, 'date': task.date,
-                             'sensor': task.sensor.sensorId})
+            tasklist.append(task.get_json())
         userlist.append({'firstName': user.user.first_name, 'lastName': user.user.last_name, 'email': user.user.email,
                          'id': user.user.pk, 'profession': user.profession.title, 'activeTasks': tasklist,
                          "lat": user.location.lat, "long": user.location.longitude,
@@ -210,7 +201,7 @@ def android_login(request):
                              "numDone": Task.objects.filter(worker=user.profile, active=False).count()})
     else:
         # Return an 'invalid login' error message.
-        return JsonResponse({"result": "bad"})
+        return JsonResponse({"result": "bad"}, status=401)
 
 def initialize(request):
     # run python manage.py flush from the command line before executing this

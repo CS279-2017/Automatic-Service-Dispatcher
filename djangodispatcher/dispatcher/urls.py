@@ -19,5 +19,8 @@ urlpatterns = [
 
     url(r'^accounts/logout/$', views.logout_view, name='logout'),
     url(r'^accounts/login/$', views.login_view, name='login'),
+
+    # android
+    url(r'^api/android/activetasks', views.get_active_user_tasks, name='active_tasks'),
     url(r'^accounts/android_login/$', views.android_login, name='login'),
 ]

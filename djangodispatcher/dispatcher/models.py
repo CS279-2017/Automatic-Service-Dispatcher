@@ -53,6 +53,18 @@ class Task(models.Model):
     def __unicode__(self):
         return self.job.title
 
+    '''def get_json(self):
+        return {'taskId': self.pk, 'workerId': self.worker.pk, 'name': self.job.name, 'date': self.date,
+                "sensor": self.sensor.sensorId}'''
+
+    def get_json(self):
+        hoursOpen = -1
+        if not self.active:
+            time = (self.datecompleted-self.date)
+            hoursOpen = time.days*24+time.seconds/3600
+        return {'taskId': self.pk, 'workerId': self.worker.pk, 'name': self.job.name, 'date': self.date,
+                "sensor": self.sensor.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen}
+
 class Sensor(models.Model):
     sensorId = models.CharField(max_length=50, default="0", unique=True)
     location = models.ForeignKey(Location)

@@ -7,5 +7,6 @@ import java.util.List;
  */
 
 public class TaskList {
-    List<Task> items;
+    List<Task> active_tasks;
+    List<Task> completed_tasks;
 }

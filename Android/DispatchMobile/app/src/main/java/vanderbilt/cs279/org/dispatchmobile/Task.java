@@ -1,15 +1,23 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
+import java.security.Timestamp;
+
 /**
  * Created by Sam on 1/31/2017.
  */
 
 public class Task {
-    String title;
-    String link;
+    long taskId;
+    long workerId;
+    String name;
+    Timestamp date;
+    long sensor;
+    Timestamp dateCompleted;
+
+    int hoursOpen;
 
     @Override
     public String toString() {
-        return(title);
+        return(name);
     }
 }
