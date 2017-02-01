@@ -19,4 +19,5 @@ urlpatterns = [
 
     url(r'^accounts/logout/$', views.logout_view, name='logout'),
     url(r'^accounts/login/$', views.login_view, name='login'),
+    url(r'^accounts/android_login/$', views.android_login, name='login'),
 ]

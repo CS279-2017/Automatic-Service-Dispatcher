@@ -195,6 +195,22 @@ def login_view(request):
         form = LoginForm()
     return render(request, 'accounts/login.html', {'form': form})
 
+@csrf_exempt
+def android_login(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        login(request, user)
+        # Redirect to a success page.
+        print(repr(user))
+        return JsonResponse({'firstName': user.first_name, 'lastName': user.last_name, 'email': user.email,
+                             'id': user.pk, 'profession': user.profile.profession.title,
+                             "numActive": Task.objects.filter(worker=user.profile, active=True).count(),
+                             "numDone": Task.objects.filter(worker=user.profile, active=False).count()})
+    else:
+        # Return an 'invalid login' error message.
+        return JsonResponse({"result": "bad"})
 
 def initialize(request):
     # run python manage.py flush from the command line before executing this
