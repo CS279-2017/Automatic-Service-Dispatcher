@@ -22,5 +22,7 @@ urlpatterns = [
 
     # android
     url(r'^api/android/activetasks', views.get_active_user_tasks, name='active_tasks'),
-    url(r'^accounts/android_login/$', views.android_login, name='login'),
+    url(r'^accounts/android_login/$', views.android_login, name='android login'),
+    url(r'^accounts/check_session/$', views.check_session, name='check_session'),
+    url(r'^accounts/android_logout/$', views.android_logout, name='android logout'),
 ]

@@ -7,6 +7,7 @@ package vanderbilt.cs279.org.dispatchmobile;
 public class LoginResult {
     String firstName;
     String lastName;
+    String sessionId;
     String email;
     String id;
     String profession;
@@ -15,6 +16,6 @@ public class LoginResult {
 
     @Override
     public String toString() {
-        return(firstName+" "+lastName);
+        return(firstName+" "+lastName+" "+sessionId);
     }
 }

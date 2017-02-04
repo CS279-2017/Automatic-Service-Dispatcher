@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.sessions.models import Session
 
 from django.utils import timezone
 
@@ -35,12 +36,16 @@ class Profile(models.Model):
     location = models.ForeignKey(Location)
     jobs = models.ManyToManyField("Job", blank=True)
     admin = models.BooleanField(default=False)
+    #session = models.ForeignKey(Session, blank=True, null=True)
+    session = models.CharField(max_length=32, default="0")
 
     def __unicode__(self):
         return self.user.username
 
     def num_active_tasks(self):
         return self.task_set.filter(active=True).count()
+
+
 
 class Task(models.Model):
     worker = models.ForeignKey(Profile)
@@ -68,3 +73,5 @@ class Task(models.Model):
 class Sensor(models.Model):
     sensorId = models.CharField(max_length=50, default="0", unique=True)
     location = models.ForeignKey(Location)
+
+

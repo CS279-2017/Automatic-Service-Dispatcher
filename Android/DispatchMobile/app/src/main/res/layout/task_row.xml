@@ -9,7 +9,6 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="#ff00ff"/>
+        android:textStyle="bold"/>
 
 </LinearLayout>

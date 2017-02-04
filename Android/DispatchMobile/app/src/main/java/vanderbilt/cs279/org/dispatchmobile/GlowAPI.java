@@ -20,6 +20,14 @@ public interface GlowAPI {
     @POST("/accounts/android_login/")
     Call<LoginResult> getUserLogin(@Field("username")String uname, @Field("password")String password);
 
+    @FormUrlEncoded
+    @POST("/accounts/check_session/")
+    Call<LoginResult> getSession(@Field("session")String session);
+
+    @FormUrlEncoded
+    @POST("/accounts/android_logout/")
+    Call<Object> logout(@Field("session")String session);
+
     //Todo: some sort of session key
     @GET("/api/android/activetasks/")
     Call<TaskList> loadActiveTasks();

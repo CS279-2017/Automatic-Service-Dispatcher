@@ -3,6 +3,9 @@ package vanderbilt.cs279.org.dispatchmobile;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
@@ -36,6 +39,11 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    // Shared Preferences for Session
+    private static final String mPREFERENCES = "GlowPrefs";
+    private static final String mSessionId = "sessionKey";
+
+    SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +75,57 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        checkSession();
+    }
+
+    /*
+    Redirects to task view if authenticated
+    */
+    private void openTaskView(){
+        Intent myIntent = new Intent(this, MainActivity.class);
+        finish();
+        startActivity(myIntent);
+    }
+    /*
+    Checks shared preferences for session id. If set, then validate against server
+     */
+    private void checkSession(){
+        mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+        String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
+        if(!sessionId.equals("N/A")){
+            checkSession(sessionId);
+        }
+    }
+
+    private void checkSession(String session){
+        //https://futurestud.io/tutorials/how-to-run-an-android-app-against-a-localhost-api
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:8000/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        // prepare call in Retrofit 2.0
+        GlowAPI glowAPI = retrofit.create(GlowAPI.class);
+        //Call<TaskList> call = glowAPI.loadQuestions("android");
+        Call<LoginResult> call = glowAPI.getSession(session);
+        //asynchronous call
+        call.enqueue(new Callback<LoginResult>() {
+            @Override
+            public void onResponse(Call<LoginResult> call, Response<LoginResult> response) {
+                if (response.isSuccessful()) {
+                    System.out.println(response.body().toString());
+                    openTaskView();
+                } else {
+                    System.out.println("error");
+                }
+                showProgress(false);
+            }
+            @Override
+            public void onFailure(Call<LoginResult> call, Throwable t) {
+                // something went completely south (like no internet connection)
+                Log.e("Error", t.getMessage());
+            }
+        });
     }
 
     /**
@@ -112,6 +171,7 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             executeLogin(email, password);
+            //checkSession();
             showProgress(true);
         }
     }
@@ -134,7 +194,12 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
             @Override
             public void onResponse(Call<LoginResult> call, Response<LoginResult> response) {
                 if (response.isSuccessful()) {
-                    System.out.println(response.body().toString());
+                    //System.out.println(response.body().toString());
+                    //System.out.println(response.body().sessionId);
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.putString(mSessionId, response.body().sessionId);
+                    editor.apply();
+                    openTaskView();
                 } else {
                     System.out.println("error");
                     // error response, no access to resource?
