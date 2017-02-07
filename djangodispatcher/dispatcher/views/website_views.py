@@ -6,8 +6,8 @@ from django.contrib.sessions.models import Session
 
 from django.views.decorators.csrf import csrf_exempt
 
-from .forms import LoginForm
-from .models import Task, Profile, Sensor, Job, Location, Profession
+from dispatcher.forms import LoginForm
+from dispatcher.models import Task, Profile, Sensor, Job, Location, Profession
 from django.contrib.auth.models import User
 
 from django.utils import timezone
@@ -187,61 +187,6 @@ def login_view(request):
     else:
         form = LoginForm()
     return render(request, 'accounts/login.html', {'form': form})
-
-@csrf_exempt
-def android_login(request):
-    #session = Session.objects.get(session_key="sosa8nrhvf0dwvjybw10davhyu2akr03")
-    #uid = session.get_decoded().get('_auth_user_id')
-    #user = User.objects.get(pk=uid)
-    #print(repr(session))
-    #session.delete()
-    #print(user.first_name)
-    # print(_get_user_session_key(request))
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(username=username, password=password)
-    if user is not None:
-        login(request, user)
-        # Redirect to a success page.
-        print(request.session.session_key)
-        profile = Profile.objects.get(user=user)
-        profile.session = request.session.session_key
-        profile.save()
-        return JsonResponse({'firstName': user.first_name, 'lastName': user.last_name, 'email': user.email,
-                             'id': user.pk, 'profession': user.profile.profession.title,
-                             "numActive": Task.objects.filter(worker=user.profile, active=True).count(),
-                             "numDone": Task.objects.filter(worker=user.profile, active=False).count(),
-                             "sessionId": request.session.session_key})
-    else:
-        # Return an 'invalid login' error message.
-        return JsonResponse({"result": "bad"}, status=401)
-
-
-@csrf_exempt
-def check_session(request):
-    session = request.POST.get('session', -1)
-    try:
-        profile = Profile.objects.get(session=session)
-        user = profile.user
-        return JsonResponse({'firstName': user.first_name, 'lastName': user.last_name, 'email': user.email,
-                             'id': user.pk, 'profession': user.profile.profession.title,
-                             "numActive": Task.objects.filter(worker=user.profile, active=True).count(),
-                             "numDone": Task.objects.filter(worker=user.profile, active=False).count(),
-                             "sessionId": session})
-    except Profile.DoesNotExist:
-        return JsonResponse({"result": "bad"}, status=401)
-
-
-@csrf_exempt
-def android_logout(request):
-    session = request.POST.get('session', -1)
-    try:
-        profile = Profile.objects.get(session=session)
-        profile.session = "0"
-        profile.save()
-        return JsonResponse({})
-    except Profile.DoesNotExist:
-        return JsonResponse({"result": "bad"}, status=401)
 
 
 def initialize(request):

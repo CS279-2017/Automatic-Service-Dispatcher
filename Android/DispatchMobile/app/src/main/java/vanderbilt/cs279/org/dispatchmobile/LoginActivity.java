@@ -21,6 +21,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -201,6 +202,7 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
                     editor.apply();
                     openTaskView();
                 } else {
+                    toast("error");
                     System.out.println("error");
                     // error response, no access to resource?
                 }
@@ -212,6 +214,11 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
                 Log.e("Error", t.getMessage());
             }
         });
+    }
+
+    private void toast(String message){
+        Toast.makeText(this, "Login Failed!",
+                Toast.LENGTH_LONG).show();
     }
 
     private boolean isEmailValid(String email) {

@@ -29,6 +29,7 @@ public interface GlowAPI {
     Call<Object> logout(@Field("session")String session);
 
     //Todo: some sort of session key
-    @GET("/api/android/activetasks/")
-    Call<TaskList> loadActiveTasks();
+    @FormUrlEncoded
+    @POST("/api/android/activetasks/")
+    Call<TaskList> loadActiveTasks(@Field("session")String session);
 }

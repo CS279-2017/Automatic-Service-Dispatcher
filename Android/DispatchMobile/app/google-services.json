@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1020870638465",
+    "firebase_url": "https://glow-22ec3.firebaseio.com",
+    "project_id": "glow-22ec3",
+    "storage_bucket": "glow-22ec3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1020870638465:android:f07a632b09c938a6",
+        "android_client_info": {
+          "package_name": "vanderbilt.cs279.org.dispatchmobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1020870638465-frnoioeulmklbtkt0ctncrlr443l6gah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHRa1SNmT97taDAXBk5DeTfEHukUgpnxg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
