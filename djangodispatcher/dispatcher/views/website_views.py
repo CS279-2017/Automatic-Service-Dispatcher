@@ -2,7 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, HttpResponseRedirect, HttpResponse
 from django.contrib.auth import logout, authenticate, login
-from django.contrib.sessions.models import Session
+from pyfcm import FCMNotification
+
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -110,6 +111,23 @@ def delegate(request):
     return JsonResponse({"result": "success", 'workerUsername': task.worker.user.username, 'workerId': task.worker.pk,
                          'name': task.job.name, 'date': task.date, 'taskId': task.pk})
 
+
+@csrf_exempt
+def create_sample_task(request):
+    API_KEY = 'AAAA7bChu4E:APA91bE9IriEYJr7n6PV7I-lcZ8k82F2nYgI-GqkYUeC09g_XCN1yZvQq3iaziQQXM7Jbh4kMYyixnlZCgCOEXcdIPSfwLG4S7NKXkAxy-oYaMPK5BeioJOMy1SkxBp5rR5B7NwbCu9G'
+    push_service = FCMNotification(api_key=API_KEY)
+    # Your api-key can be gotten from:  https://console.firebase.google.com/project/<project-name>/settings/cloudmessaging
+    # AIzaSyComw1k-ukcSZcYgGRbae2MjOyka1PA60w
+    profile = Profile.objects.get(user__username="mechanic")
+    registration_id = profile.device
+    # registration_id = "fL0Crhz4i58:APA91bHXi1c8RE1s2SJ_7wL6ibrz0vWgyF4w1IaU5ZKy8QCbfh7YPOQBd8vzkRaH70fElhUpnXdjT_H-ANdZCRpbciQM3_FsLH_ZFxdBxDSg60ocwXkR5LIr_3gpqrdHTJjkQ8JwdkNs"
+    print len(registration_id)
+    message_title = "Uber update"
+    message_body = "Hi john, your customized news for today is ready"
+    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body)
+
+    print result
+    return JsonResponse({})
 
 # operator APIs
 @login_required

@@ -1,7 +1,9 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -10,6 +12,12 @@ import com.google.firebase.iid.FirebaseInstanceIdService;
 
 public class FirebaseIDService extends FirebaseInstanceIdService {
     private static final String TAG = "FirebaseIDService";
+
+    private static final String mPREFERENCES = "GlowPrefs";
+    private static final String mSessionId = "sessionKey";
+    private static final String mDeviceId = "deviceId";
+
+    SharedPreferences mSharedPreferences;
 
     @Override
     public void onTokenRefresh() {
@@ -31,6 +39,10 @@ public class FirebaseIDService extends FirebaseInstanceIdService {
      */
     private void sendRegistrationToServer(String token) {
         // Add custom implementation, as needed.
+        mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(mDeviceId, token);
+        editor.apply();
     }
 }
 

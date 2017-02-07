@@ -13,8 +13,11 @@ from django.utils import timezone
 @csrf_exempt
 def get_active_user_tasks_android(request):
     session = request.POST.get('session', -1)
+    deviceId = request.POST['deviceId']
     try:
         user = Profile.objects.get(session=session)
+        user.device = deviceId
+        user.save()
         mytask = []
         for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
             mytask.append(task.get_json())
@@ -63,6 +66,8 @@ def android_login(request):
     # print(_get_user_session_key(request))
     username = request.POST['username']
     password = request.POST['password']
+    deviceId = request.POST['deviceId']
+    print(deviceId)
     user = authenticate(username=username, password=password)
     if user is not None:
         login(request, user)
@@ -70,6 +75,7 @@ def android_login(request):
         print(request.session.session_key)
         profile = Profile.objects.get(user=user)
         profile.session = request.session.session_key
+        profile.device = deviceId
         profile.save()
         return JsonResponse({'firstName': user.first_name, 'lastName': user.last_name, 'email': user.email,
                              'id': user.pk, 'profession': user.profile.profession.title,
@@ -84,8 +90,11 @@ def android_login(request):
 @csrf_exempt
 def check_session(request):
     session = request.POST.get('session', -1)
+    deviceId = request.POST['deviceId']
     try:
         profile = Profile.objects.get(session=session)
+        profile.device = deviceId
+        profile.save()
         user = profile.user
         return JsonResponse({'firstName': user.first_name, 'lastName': user.last_name, 'email': user.email,
                              'id': user.pk, 'profession': user.profile.profession.title,
@@ -102,6 +111,7 @@ def android_logout(request):
     try:
         profile = Profile.objects.get(session=session)
         profile.session = "0"
+        profile.device = "0"
         profile.save()
         return JsonResponse({})
     except Profile.DoesNotExist:

@@ -38,6 +38,7 @@ public class MainActivity extends ListActivity {
     // Shared Preferences for Session
     private static final String mPREFERENCES = "GlowPrefs";
     private static final String mSessionId = "sessionKey";
+    private static final String mDeviceId = "deviceId";
 
     SharedPreferences mSharedPreferences;
 
@@ -50,7 +51,9 @@ public class MainActivity extends ListActivity {
         mLogoutButton = (Button) findViewById(R.id.logout);
         mLogoutButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                logout(getSession());
+                mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+                String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
+                logout(sessionId);
             }
         });
 
@@ -74,22 +77,18 @@ public class MainActivity extends ListActivity {
         //mText.setText("You clicked " + selectedItem + " at position " + position);
     }
 
-    /*
-    Checks shared preferences for session id. If set, then validate against server
-     */
-    private String getSession(){
-        mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
-        return mSharedPreferences.getString(mSessionId, "N/A");
-    }
-
     private void getTasks(){
-        String sessionId = getSession();
+        mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+        String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
+        //TODO: only needed for login? if they are logged in to multiple devices this would
+        // indicate the current device they are using
+        String deviceId = mSharedPreferences.getString(mDeviceId, "N/A");
         if(!sessionId.equals("N/A")){
-            getTasks(sessionId);
+            getTasks(sessionId, deviceId);
         }
     }
 
-    private void getTasks(String session){
+    private void getTasks(String session, String deviceId){
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://10.0.2.2:8000/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -97,7 +96,7 @@ public class MainActivity extends ListActivity {
         // prepare call in Retrofit 2.0
         GlowAPI glowAPI = retrofit.create(GlowAPI.class);
         //Call<TaskList> call = glowAPI.loadQuestions("android");
-        Call<TaskList> call = glowAPI.loadActiveTasks(session);
+        Call<TaskList> call = glowAPI.loadActiveTasks(session, deviceId);
         //asynchronous call
         call.enqueue(new Callback<TaskList>() {
             @Override

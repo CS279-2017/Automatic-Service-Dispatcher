@@ -18,11 +18,11 @@ public interface GlowAPI {
     //http://stackoverflow.com/questions/36703737/simple-login-form-with-retrofit
     @FormUrlEncoded
     @POST("/accounts/android_login/")
-    Call<LoginResult> getUserLogin(@Field("username")String uname, @Field("password")String password);
+    Call<LoginResult> getUserLogin(@Field("username")String uname, @Field("password")String password, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/accounts/check_session/")
-    Call<LoginResult> getSession(@Field("session")String session);
+    Call<LoginResult> getSession(@Field("session")String session, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/accounts/android_logout/")
@@ -31,5 +31,5 @@ public interface GlowAPI {
     //Todo: some sort of session key
     @FormUrlEncoded
     @POST("/api/android/activetasks/")
-    Call<TaskList> loadActiveTasks(@Field("session")String session);
+    Call<TaskList> loadActiveTasks(@Field("session")String session, @Field("deviceId")String deviceId);
 }

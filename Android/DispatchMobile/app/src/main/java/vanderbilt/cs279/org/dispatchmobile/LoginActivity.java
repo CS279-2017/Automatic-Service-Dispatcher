@@ -43,6 +43,7 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
     // Shared Preferences for Session
     private static final String mPREFERENCES = "GlowPrefs";
     private static final String mSessionId = "sessionKey";
+    private static final String mDeviceId = "deviceId";
 
     SharedPreferences mSharedPreferences;
 
@@ -94,12 +95,13 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
     private void checkSession(){
         mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
         String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
+        String deviceId = mSharedPreferences.getString(mDeviceId, "N/A");
         if(!sessionId.equals("N/A")){
-            checkSession(sessionId);
+            checkSession(sessionId, deviceId);
         }
     }
 
-    private void checkSession(String session){
+    private void checkSession(String session, String deviceId){
         //https://futurestud.io/tutorials/how-to-run-an-android-app-against-a-localhost-api
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://10.0.2.2:8000/")
@@ -108,7 +110,7 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
         // prepare call in Retrofit 2.0
         GlowAPI glowAPI = retrofit.create(GlowAPI.class);
         //Call<TaskList> call = glowAPI.loadQuestions("android");
-        Call<LoginResult> call = glowAPI.getSession(session);
+        Call<LoginResult> call = glowAPI.getSession(session, deviceId);
         //asynchronous call
         call.enqueue(new Callback<LoginResult>() {
             @Override
@@ -171,13 +173,15 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            executeLogin(email, password);
+            mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+            String deviceId = mSharedPreferences.getString(mDeviceId, "N/A");
+            executeLogin(email, password, deviceId);
             //checkSession();
             showProgress(true);
         }
     }
 
-    private void executeLogin(String email, String password){
+    private void executeLogin(String email, String password, String deviceId){
         //https://futurestud.io/tutorials/how-to-run-an-android-app-against-a-localhost-api
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://10.0.2.2:8000/")
@@ -188,7 +192,7 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
         GlowAPI glowAPI = retrofit.create(GlowAPI.class);
 
         //Call<TaskList> call = glowAPI.loadQuestions("android");
-        Call<LoginResult> call = glowAPI.getUserLogin(email, password);
+        Call<LoginResult> call = glowAPI.getUserLogin(email, password, deviceId);
 
         //asynchronous call
         call.enqueue(new Callback<LoginResult>() {

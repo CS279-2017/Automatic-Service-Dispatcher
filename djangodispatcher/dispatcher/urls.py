@@ -25,4 +25,9 @@ urlpatterns = [
     url(r'^accounts/android_login/$', android_views.android_login, name='android login'),
     url(r'^accounts/check_session/$', android_views.check_session, name='check_session'),
     url(r'^accounts/android_logout/$', android_views.android_logout, name='android logout'),
+
+
+    url(r'^api/create_task/$', website_views.create_sample_task, name='create task'),
+
+
 ]

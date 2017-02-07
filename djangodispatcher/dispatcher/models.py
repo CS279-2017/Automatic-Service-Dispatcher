@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import uuid
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -38,6 +39,7 @@ class Profile(models.Model):
     admin = models.BooleanField(default=False)
     #session = models.ForeignKey(Session, blank=True, null=True)
     session = models.CharField(max_length=32, default="0")
+    device = models.CharField(default="0", max_length=200)
 
     def __unicode__(self):
         return self.user.username
