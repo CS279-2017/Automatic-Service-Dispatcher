@@ -20,22 +20,22 @@ public interface GlowAPI {
     //http://stackoverflow.com/questions/36703737/simple-login-form-with-retrofit
     @FormUrlEncoded
     @POST("/accounts/android_login/")
-    Call<LoginResult> getUserLogin(@Field("username")String uname, @Field("password")String password);
+    Call<LoginResult> getUserLogin(@Field("username")String uname, @Field("password")String password, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/accounts/check_session/")
-    Call<LoginResult> getSession(@Field("session")String session);
+    Call<LoginResult> getSession(@Field("session")String session, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/accounts/android_logout/")
     Call<Object> logout(@Field("session")String session);
 
     //Todo: some sort of session key
+
     @GET("/api/android/activetasks/")
     Call<TaskList> loadActiveTasks();
 
     // Location Update
-    // todo security? Need to send some auth token?
     @FormUrlEncoded
     @POST("someapi/locationupdate") // todo web server location api
     Call<Object> updateLocation(@Field("workerId") long workerId,
@@ -46,4 +46,7 @@ public interface GlowAPI {
 
 
 
+    @FormUrlEncoded
+    @POST("/api/android/activetasks/")
+    Call<TaskList> loadActiveTasks(@Field("session")String session, @Field("deviceId")String deviceId);
 }

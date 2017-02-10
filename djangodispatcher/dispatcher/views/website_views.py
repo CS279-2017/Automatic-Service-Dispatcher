@@ -2,12 +2,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, HttpResponseRedirect, HttpResponse
 from django.contrib.auth import logout, authenticate, login
-from django.contrib.sessions.models import Session
+from pyfcm import FCMNotification
+
 
 from django.views.decorators.csrf import csrf_exempt
 
-from .forms import LoginForm
-from .models import Task, Profile, Sensor, Job, Location, Profession
+from dispatcher.forms import LoginForm
+from dispatcher.models import Task, Profile, Sensor, Job, Location, Profession
 from django.contrib.auth.models import User
 
 from django.utils import timezone
@@ -111,6 +112,23 @@ def delegate(request):
                          'name': task.job.name, 'date': task.date, 'taskId': task.pk})
 
 
+@csrf_exempt
+def create_sample_task(request):
+    API_KEY = 'AAAA7bChu4E:APA91bE9IriEYJr7n6PV7I-lcZ8k82F2nYgI-GqkYUeC09g_XCN1yZvQq3iaziQQXM7Jbh4kMYyixnlZCgCOEXcdIPSfwLG4S7NKXkAxy-oYaMPK5BeioJOMy1SkxBp5rR5B7NwbCu9G'
+    push_service = FCMNotification(api_key=API_KEY)
+    # Your api-key can be gotten from:  https://console.firebase.google.com/project/<project-name>/settings/cloudmessaging
+    # AIzaSyComw1k-ukcSZcYgGRbae2MjOyka1PA60w
+    profile = Profile.objects.get(user__username="mechanic")
+    registration_id = profile.device
+    # registration_id = "fL0Crhz4i58:APA91bHXi1c8RE1s2SJ_7wL6ibrz0vWgyF4w1IaU5ZKy8QCbfh7YPOQBd8vzkRaH70fElhUpnXdjT_H-ANdZCRpbciQM3_FsLH_ZFxdBxDSg60ocwXkR5LIr_3gpqrdHTJjkQ8JwdkNs"
+    print len(registration_id)
+    message_title = "Uber update"
+    message_body = "Hi john, your customized news for today is ready"
+    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body)
+
+    print result
+    return JsonResponse({})
+
 # operator APIs
 @login_required
 def get_all_workers(request):
@@ -187,61 +205,6 @@ def login_view(request):
     else:
         form = LoginForm()
     return render(request, 'accounts/login.html', {'form': form})
-
-@csrf_exempt
-def android_login(request):
-    #session = Session.objects.get(session_key="sosa8nrhvf0dwvjybw10davhyu2akr03")
-    #uid = session.get_decoded().get('_auth_user_id')
-    #user = User.objects.get(pk=uid)
-    #print(repr(session))
-    #session.delete()
-    #print(user.first_name)
-    # print(_get_user_session_key(request))
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(username=username, password=password)
-    if user is not None:
-        login(request, user)
-        # Redirect to a success page.
-        print(request.session.session_key)
-        profile = Profile.objects.get(user=user)
-        profile.session = request.session.session_key
-        profile.save()
-        return JsonResponse({'firstName': user.first_name, 'lastName': user.last_name, 'email': user.email,
-                             'id': user.pk, 'profession': user.profile.profession.title,
-                             "numActive": Task.objects.filter(worker=user.profile, active=True).count(),
-                             "numDone": Task.objects.filter(worker=user.profile, active=False).count(),
-                             "sessionId": request.session.session_key})
-    else:
-        # Return an 'invalid login' error message.
-        return JsonResponse({"result": "bad"}, status=401)
-
-
-@csrf_exempt
-def check_session(request):
-    session = request.POST.get('session', -1)
-    try:
-        profile = Profile.objects.get(session=session)
-        user = profile.user
-        return JsonResponse({'firstName': user.first_name, 'lastName': user.last_name, 'email': user.email,
-                             'id': user.pk, 'profession': user.profile.profession.title,
-                             "numActive": Task.objects.filter(worker=user.profile, active=True).count(),
-                             "numDone": Task.objects.filter(worker=user.profile, active=False).count(),
-                             "sessionId": session})
-    except Profile.DoesNotExist:
-        return JsonResponse({"result": "bad"}, status=401)
-
-
-@csrf_exempt
-def android_logout(request):
-    session = request.POST.get('session', -1)
-    try:
-        profile = Profile.objects.get(session=session)
-        profile.session = "0"
-        profile.save()
-        return JsonResponse({})
-    except Profile.DoesNotExist:
-        return JsonResponse({"result": "bad"}, status=401)
 
 
 def initialize(request):

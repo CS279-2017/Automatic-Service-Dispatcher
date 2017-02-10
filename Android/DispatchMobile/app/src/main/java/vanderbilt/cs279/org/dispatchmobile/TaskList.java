@@ -8,5 +8,15 @@ import java.util.List;
 
 public class TaskList {
     List<Task> active_tasks;
-    List<Task> completed_tasks;
+    //List<Task> completed_tasks;
+
+
+    @Override
+    public String toString() {
+        String str = "";
+        for(int i =0;i<active_tasks.size(); i++){
+            str+=active_tasks.get(i).name;
+        }
+        return(str);
+    }
 }

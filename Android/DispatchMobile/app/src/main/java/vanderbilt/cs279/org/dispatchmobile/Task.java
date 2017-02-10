@@ -10,9 +10,9 @@ public class Task {
     long taskId;
     long workerId;
     String name;
-    Timestamp date;
+    String date;
     long sensor;
-    Timestamp dateCompleted;
+    String dateCompleted;
 
     int hoursOpen;
 
