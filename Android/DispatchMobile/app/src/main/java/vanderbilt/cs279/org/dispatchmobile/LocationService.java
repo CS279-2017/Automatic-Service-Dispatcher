@@ -12,6 +12,7 @@ import android.util.Log;
 
 /**
  * todo : untested
+ * todo : so far only set up to update web api. Messaging needed for local updates?
  */
 public class LocationService extends Service {
 
@@ -52,6 +53,9 @@ public class LocationService extends Service {
     public void onCreate() {
         super.onCreate();
         initializeLocationManager();
+
+        // todo move to onBind ... need to get worker id / session key
+
         try {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                     LOCATION_UPDATE_INTERVAL,

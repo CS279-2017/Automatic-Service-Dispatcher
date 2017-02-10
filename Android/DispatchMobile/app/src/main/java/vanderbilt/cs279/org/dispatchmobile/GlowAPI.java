@@ -1,6 +1,8 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
 
+import java.security.Timestamp;
+
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -31,4 +33,17 @@ public interface GlowAPI {
     //Todo: some sort of session key
     @GET("/api/android/activetasks/")
     Call<TaskList> loadActiveTasks();
+
+    // Location Update
+    // todo security? Need to send some auth token?
+    @FormUrlEncoded
+    @POST("someapi/locationupdate") // todo web server location api
+    Call<Object> updateLocation(@Field("workerId") long workerId,
+                                @Field("timeStamp") Timestamp timestamp,
+                                @Field("latitude") long latitude,
+                                @Field("longitude") long longitude);
+
+
+
+
 }
