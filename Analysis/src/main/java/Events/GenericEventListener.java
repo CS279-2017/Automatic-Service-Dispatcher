@@ -68,7 +68,7 @@ public class GenericEventListener implements EsperEventListener{
                         (Double) event.get("voltage")),
                 new Tag(mEventDescription),
                 gson.toJson(mElementsOfInterest));
-        
+
         String jsonString = gson.toJson(alert);
 
         System.out.println(jsonString);

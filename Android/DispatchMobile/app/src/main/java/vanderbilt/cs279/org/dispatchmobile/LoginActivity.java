@@ -1,15 +1,21 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
+import android.*;
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -47,9 +53,70 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
 
     SharedPreferences mSharedPreferences;
 
+    /////////////////////////////////////////////////////////////////////
+    // todo geoff
+    private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION=1;
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String permissions[],
+            int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSION_ACCESS_FINE_LOCATION:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Log.i("login", "Permission Granted");
+                    startLocationService();
+                } else {
+                    Log.i("login", "Permission Denied");
+                }
+        }
+    }
+
+    private void startLocationService(){
+        Log.i("login", "Starting Service");
+
+        Intent locIntent = new Intent(this, LocationService.class);
+        locIntent.putExtra(LocationService.SESSION_STRING, "test_session");
+
+        startService(locIntent);
+    }
+
+    private void stopLocationService() {
+
+    }
+
+    /////////////////////////////////////////////////////////////////////
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /////////////////////////////////////////////////
+        // todo Geoff
+        // Location serice testing
+
+        if(ContextCompat.checkSelfPermission(this,
+                                            Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            }
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_PERMISSION_ACCESS_FINE_LOCATION);
+
+        } else {
+            startLocationService();
+        }
+
+        startLocationService();
+        /////////////////////////////////////////////////
+
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -79,6 +146,17 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
         mProgressView = findViewById(R.id.login_progress);
 
         checkSession();
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        /////////////////////////////////////////////////
+        // todo Geoff
+        // Location serice testing
+        stopLocationService();
+        Log.i("login", "service stoped");
+        /////////////////////////////////////////////////
     }
 
     /*
