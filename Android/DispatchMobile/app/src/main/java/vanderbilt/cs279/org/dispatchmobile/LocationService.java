@@ -3,6 +3,7 @@ package vanderbilt.cs279.org.dispatchmobile;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -10,35 +11,89 @@ import android.os.IBinder;
 import android.location.LocationListener;
 import android.util.Log;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 /**
  * todo : untested
  * todo : so far only set up to update web api. Messaging needed for local updates?
  */
 public class LocationService extends Service {
 
+    public static final int SERVICE_STARTED = 1;
+
+    public static final String SESSION_STRING = "sess_string";
+
     private static final String TAG = LOCATION_SERVICE.getClass().getCanonicalName();
     private LocationManager mLocationManager = null;
     private static final int LOCATION_UPDATE_INTERVAL = 1000; // in millisec
     private static final float LOCATION_UPDATE_DISTANCE = 10f;
 
-    private LocationListener mLocationListener = new LocationListener() {
+    private String mSession = null;
+
+    private class CustomLocListener implements LocationListener {
+
+        private String mSession = null;
+
+        public CustomLocListener(String session){
+            mSession = session;
+        }
+
         @Override
         public void onLocationChanged(Location location) {
             // todo update web api
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("http://10.0.2.2:8000/") // todo
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            // prepare call in Retrofit 2.0
+            GlowAPI glowAPI = retrofit.create(GlowAPI.class);
+
+            Call<Object> call = glowAPI.updateLocation(mSession,
+                                                    location.getTime(),
+                                                    location.getLatitude(),
+                                                    location.getLongitude());
+
+
+            //asynchronous call
+            call.enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(Call<Object> call, Response<Object> response) {
+                    if (response.isSuccessful()) {
+                        Log.i(TAG, "Location update successful");
+                    } else {
+                        Log.i(TAG, "Location update unsuccessful");
+                    }
+                }
+                @Override
+                public void onFailure(Call<Object> call, Throwable t) {
+                    Log.e(TAG, "Location update failure: " + t.getMessage());
+                }
+            });
+
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
+
         }
 
         @Override
         public void onProviderEnabled(String provider) {
+
         }
 
         @Override
         public void onProviderDisabled(String provider) {
+
         }
-    };
+    }
+
+    private LocationListener mLocationListener = null;
 
     public LocationService() {
     }
@@ -50,11 +105,13 @@ public class LocationService extends Service {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        initializeLocationManager();
+    public int onStartCommand(Intent intent, int flags, int startId){
 
-        // todo move to onBind ... need to get worker id / session key
+        // get the session id from the caller
+        String session = intent.getStringExtra(SESSION_STRING);
+
+        // create the location listener
+        mLocationListener = new CustomLocListener(session);
 
         try {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
@@ -64,6 +121,14 @@ public class LocationService extends Service {
         }catch (java.lang.SecurityException ex) {
             Log.i(TAG, "location permission error");
         }
+
+        return SERVICE_STARTED;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        initializeLocationManager();
     }
 
     @Override

@@ -38,12 +38,10 @@ public interface GlowAPI {
     // Location Update
     @FormUrlEncoded
     @POST("someapi/locationupdate") // todo web server location api
-    Call<Object> updateLocation(@Field("workerId") long workerId,
-                                @Field("timeStamp") Timestamp timestamp,
-                                @Field("latitude") long latitude,
-                                @Field("longitude") long longitude);
-
-
+    Call<Object> updateLocation(@Field("session") String session,
+                                @Field("timeStamp") long timestamp,
+                                @Field("latitude") double latitude,
+                                @Field("longitude") double longitude);
 
 
     @FormUrlEncoded

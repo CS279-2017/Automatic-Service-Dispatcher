@@ -1,5 +1,7 @@
 package Data;
 
+import com.google.gson.JsonArray;
+
 /**
  * Created by gpettet on 2016-12-01.
  */
@@ -7,6 +9,16 @@ public class AlertData {
 
     private Data data;
     private Tag tag;
+    private String interestElements;
+
+    public String getInterestElements() {
+        return interestElements;
+    }
+
+    public void setInterestElements(String interestElements) {
+        this.interestElements = interestElements;
+    }
+
 
     public Data getData() {
         return data;
@@ -24,8 +36,9 @@ public class AlertData {
         this.tag = tag;
     }
 
-    public AlertData(Data data, Tag tag) {
+    public AlertData(Data data, Tag tag, String interestElements) {
         this.data = data;
         this.tag = tag;
+        this.interestElements = interestElements;
     }
 }
