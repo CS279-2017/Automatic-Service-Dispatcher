@@ -1,6 +1,6 @@
 package Events;
 
-import Data.AlertData;
+import Data.OldAlertData;
 import Data.Data;
 import Data.Tag;
 import Utils.RestUtils;
@@ -46,7 +46,7 @@ public class TempChangeListener implements EsperEventListener {
     }
 
     private void sendAlert(EventBean event, double tempFluc) {
-        AlertData alert = new AlertData(
+        OldAlertData alert = new OldAlertData(
                 new Data(
                         sensorID,
                         tempFluc,

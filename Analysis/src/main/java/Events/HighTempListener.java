@@ -1,6 +1,6 @@
 package Events;
 
-import Data.AlertData;
+import Data.OldAlertData;
 import Data.Tag;
 import Data.Data;
 import Utils.RestUtils;
@@ -39,7 +39,7 @@ public class HighTempListener implements EsperEventListener {
     }
 
     private void sendAlert(EventBean event) {
-        AlertData alert = new AlertData(
+        OldAlertData alert = new OldAlertData(
                 new Data(
                         sensorID,
                         (Double) event.get("temperature"),

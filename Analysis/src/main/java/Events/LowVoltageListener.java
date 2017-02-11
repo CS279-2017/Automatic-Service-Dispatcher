@@ -1,6 +1,6 @@
 package Events;
 
-import Data.AlertData;
+import Data.OldAlertData;
 import Data.Data;
 import Data.Tag;
 import Utils.RestUtils;
@@ -38,7 +38,7 @@ public class LowVoltageListener implements EsperEventListener {
     }
 
     private void sendAlert(EventBean event) {
-        AlertData alert = new AlertData(
+        OldAlertData alert = new OldAlertData(
                 new Data(
                         sensorID,
                         (Double) event.get("temperature"),
