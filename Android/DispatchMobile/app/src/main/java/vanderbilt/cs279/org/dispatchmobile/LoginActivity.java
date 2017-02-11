@@ -85,7 +85,8 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
     }
 
     private void stopLocationService() {
-
+        Intent locIntent = new Intent(this, LocationService.class);
+        stopService(locIntent);
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -97,24 +98,24 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
         /////////////////////////////////////////////////
         // todo Geoff
         // Location serice testing
-
-        if(ContextCompat.checkSelfPermission(this,
-                                            Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED){
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-            }
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_PERMISSION_ACCESS_FINE_LOCATION);
-
-        } else {
-            startLocationService();
-        }
-
-        startLocationService();
+//
+//        if(ContextCompat.checkSelfPermission(this,
+//                                            Manifest.permission.ACCESS_FINE_LOCATION)
+//                != PackageManager.PERMISSION_GRANTED){
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+//                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+//
+//            }
+//
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+//                    REQUEST_PERMISSION_ACCESS_FINE_LOCATION);
+//
+//        } else {
+//            startLocationService();
+//        }
+//
+//        startLocationService();
         /////////////////////////////////////////////////
 
         setContentView(R.layout.activity_login);
@@ -154,8 +155,8 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
         /////////////////////////////////////////////////
         // todo Geoff
         // Location serice testing
-        stopLocationService();
-        Log.i("login", "service stoped");
+//        stopLocationService();
+//        Log.i("login", "service stoped");
         /////////////////////////////////////////////////
     }
 
