@@ -266,13 +266,10 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
                 .baseUrl("http://10.0.2.2:8000/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-
         // prepare call in Retrofit 2.0
         GlowAPI glowAPI = retrofit.create(GlowAPI.class);
-
         //Call<TaskList> call = glowAPI.loadQuestions("android");
         Call<LoginResult> call = glowAPI.getUserLogin(email, password, deviceId);
-
         //asynchronous call
         call.enqueue(new Callback<LoginResult>() {
             @Override

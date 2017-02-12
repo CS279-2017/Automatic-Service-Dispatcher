@@ -59,7 +59,7 @@ def complete_task(request):
         task.save()
         user = Profile.objects.get(user=request.user)
         result = {'completed_tasks': [], 'active_tasks': []}
-        for task in Task.objects.filter(worker=user, active=False):
+        for task in Task.objects.filter(worker=user):
             if task.active:
                 result["active_tasks"].append(task.get_json())
             else:
