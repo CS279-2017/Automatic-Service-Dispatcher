@@ -1,12 +1,12 @@
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login
 
 from django.views.decorators.csrf import csrf_exempt
 
-from dispatcher.models import Task, Profile
+from dispatcher.models import Task, Profile, Location
 
 from django.utils import timezone
+import datetime
 
 
 
@@ -26,19 +26,12 @@ def get_active_user_tasks_android(request):
         return JsonResponse({"result": "bad"}, status=401)
 
 
-@login_required
-def get_completed_user_tasks(request):
-    user = Profile.objects.get(user=request.user)
-    mytask = []
-    for task in Task.objects.filter(worker=user, active=False).order_by("-date"):
-        mytask.append(task.get_json())
-    return JsonResponse({'completed_tasks': mytask})
-
-
-@login_required
+@csrf_exempt
 def complete_task(request):
+    session = request.POST.get('session', -1)
     task_id = request.POST.get('taskId', -1)
     try:
+        profile = Profile.objects.get(session=session)
         task = Task.objects.get(pk=task_id)
         task.active = False
         task.datecompleted = timezone.now()
@@ -51,19 +44,14 @@ def complete_task(request):
             else:
                 result["completed_tasks"].append(task.get_json())
         return JsonResponse(result)
+    except Profile.DoesNotExist:
+        return JsonResponse({"result": "Invalid Session!"}, status=401)
     except Task.DoesNotExist:
         return JsonResponse({"result": "error"})
 
 
 @csrf_exempt
 def android_login(request):
-    #session = Session.objects.get(session_key="sosa8nrhvf0dwvjybw10davhyu2akr03")
-    #uid = session.get_decoded().get('_auth_user_id')
-    #user = User.objects.get(pk=uid)
-    #print(repr(session))
-    #session.delete()
-    #print(user.first_name)
-    # print(_get_user_session_key(request))
     username = request.POST['username']
     password = request.POST['password']
     deviceId = request.POST['deviceId']
@@ -103,6 +91,22 @@ def check_session(request):
                              "sessionId": session})
     except Profile.DoesNotExist:
         return JsonResponse({"result": "bad"}, status=401)
+
+@csrf_exempt
+def update_location(request):
+    session = request.POST.get('session', -1)
+    try:
+        profile = Profile.objects.get(session=session)
+        lat = request.POST.get('latitude', None)
+        longitude = request.POST.get('longitude', None)
+        time = datetime.datetime.fromtimestamp(float(request.POST.get('timestamp', None)))
+        if not lat or not longitude:
+            return JsonResponse({"result": "Unexpected Input"}, status=401)
+        loc = Location.objects.create(lat=lat, longitude=longitude, time=time)
+        profile.locations.add(loc)
+        profile.save()
+    except (Profile.DoexNotExist, ValueError, TypeError):
+        return JsonResponse({"result": "Error parsing inputs"}, status=401)
 
 
 @csrf_exempt

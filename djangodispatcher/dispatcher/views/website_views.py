@@ -98,9 +98,9 @@ def delegate(request):
     # for all users that can solve the task
     # sample is 0.313+0.1 for each queued (to account for distance)
     for user in Profile.objects.filter(profession__jobs=job, admin=False):
-        # queue closest
-        distance = math.sqrt(math.pow(abs(sensor.location.lat-user.location.lat), 2) +
-                             math.pow(abs(sensor.location.longitude-user.location.longitude), 2))
+        location = user.current_location()
+        distance = math.sqrt(math.pow(abs(sensor.location.lat-location.lat), 2) +
+                             math.pow(abs(sensor.location.longitude-location.longitude), 2))
         value = distance + 0.1*user.num_active_tasks()
         if smallest == -1 or value < smallest:
             correct_user = user
@@ -108,6 +108,8 @@ def delegate(request):
     if correct_user is None:
         return JsonResponse({"error": "no user found"})
     task = Task.objects.create(worker=correct_user, sensor=sensor, job=job, date=date)
+    # Now push notification to user
+    correct_user.push_notification(title="New Task", body=metric+" at Sensor "+sensorId)
     return JsonResponse({"result": "success", 'workerUsername': task.worker.user.username, 'workerId': task.worker.pk,
                          'name': task.job.name, 'date': task.date, 'taskId': task.pk})
 
@@ -125,7 +127,6 @@ def create_sample_task(request):
     message_title = "Uber update"
     message_body = "Hi john, your customized news for today is ready"
     result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body)
-
     print result
     return JsonResponse({})
 
@@ -139,7 +140,7 @@ def get_all_workers(request):
             tasklist.append(task.get_json())
         userlist.append({'firstName': user.user.first_name, 'lastName': user.user.last_name, 'email': user.user.email,
                          'id': user.user.pk, 'profession': user.profession.title, 'activeTasks': tasklist,
-                         "lat": user.location.lat, "long": user.location.longitude,
+                         "lat": user.current_location().lat, "long": user.current_location().longitude,
                          "numActive": Task.objects.filter(worker=user, active=True).count(),
                          "numDone": Task.objects.filter(worker=user, active=False).count()})
     return JsonResponse({"users": userlist})
@@ -250,16 +251,24 @@ def initialize(request):
 
     admin = User.objects.create_superuser(username="admin", email="sam@gmail.com", password="engineering",
                                           first_name="CSX278", last_name="Class")
-    Profile.objects.create(user=admin, profession=op, location=loc5, admin=True)
+    ad = Profile.objects.create(user=admin, profession=op, location=loc5, admin=True)
+    ad.locations.add(loc5)
+    ad.save()
     u1 = User.objects.create_user(username="electrician", email="electrician", password="engineering", first_name="Joe",
                                   last_name="Electrician")
     p1 = Profile.objects.create(user=u1, profession=elec, location=loc5, admin=False)
+    p1.locations.add(loc5)
+    p1.save()
     u2 = User.objects.create_user(username="mechanic", email="mechanic", password="engineering", first_name="Ben",
                                   last_name="Mechanic")
     p2 = Profile.objects.create(user=u2, profession=mech, location=loc6, admin=False)
+    p2.locations.add(loc6)
+    p2.save()
     u3 = User.objects.create_user(username="mechanic2", email="mechanic2", password="engineering", first_name="Other",
                                   last_name="Mechanic")
     p3 = Profile.objects.create(user=u3, profession=mech, location=loc7, admin=False)
+    p3.locations.add(loc7)
+    p3.save()
 
     Task.objects.create(worker=p1, sensor=s1, job=j1, date=datetime.datetime(2016, 11, 28, 14, 11, 56, tzinfo=pytz.utc),
                         datecompleted=datetime.datetime(2016, 11, 28, 18, 5, 48, tzinfo=pytz.utc), active=False)

@@ -3,9 +3,10 @@ import uuid
 
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.sessions.models import Session
 
 from django.utils import timezone
+
+from pyfcm import FCMNotification
 
 class Profession(models.Model):
     title = models.CharField(max_length=30, default="None")
@@ -26,6 +27,7 @@ class Job(models.Model):
 class Location(models.Model):
     lat = models.DecimalField(max_digits=8, decimal_places=5)
     longitude = models.DecimalField(max_digits=8, decimal_places=5)
+    time = models.DateTimeField(default=timezone.now())
 
     def __unicode__(self):
         return str(self.lat)+" " +str(self.longitude)
@@ -34,7 +36,7 @@ class Location(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profession = models.ForeignKey(Profession)
-    location = models.ForeignKey(Location)
+    locations = models.ManyToManyField(Location)
     jobs = models.ManyToManyField("Job", blank=True)
     admin = models.BooleanField(default=False)
     #session = models.ForeignKey(Session, blank=True, null=True)
@@ -47,6 +49,15 @@ class Profile(models.Model):
     def num_active_tasks(self):
         return self.task_set.filter(active=True).count()
 
+    def current_location(self):
+        recent = self.locations.order_by('time')
+        return recent[0]
+
+    def push_notification(self, title, body):
+        API_KEY = 'AAAA7bChu4E:APA91bE9IriEYJr7n6PV7I-lcZ8k82F2nYgI-GqkYUeC09g_XCN1yZvQq3iaziQQXM7Jbh4kMYyixnlZCgCOEXcdIPSfwLG4S7NKXkAxy-oYaMPK5BeioJOMy1SkxBp5rR5B7NwbCu9G'
+        push_service = FCMNotification(api_key=API_KEY)
+        registration_id = self.device
+        push_service.notify_single_device(registration_id=registration_id, message_title=title, message_body=body)
 
 
 class Task(models.Model):
