@@ -32,7 +32,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends ListActivity {
 
     private TextView mText;
-    private Button mLogoutButton;
+    private Button mLogoutButton, mSettingsButton;
     private TasksAdapter mAdapter;
 
     // Shared Preferences for Session
@@ -41,6 +41,8 @@ public class MainActivity extends ListActivity {
     private static final String mDeviceId = "deviceId";
 
     SharedPreferences mSharedPreferences;
+    Retrofit retrofit;
+    GlowAPI glowAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +58,24 @@ public class MainActivity extends ListActivity {
                 logout(sessionId);
             }
         });
+        mSettingsButton = (Button) findViewById(R.id.settings_button);
+        mSettingsButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                openSettings();
+            }
+        });
 
         ArrayList<Task> arrayOfUsers = new ArrayList<Task>();
         mAdapter = new TasksAdapter(this, arrayOfUsers);
         setListAdapter(mAdapter);
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:8000/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        glowAPI = retrofit.create(GlowAPI.class);
+
+        mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -78,7 +94,6 @@ public class MainActivity extends ListActivity {
     }
 
     private void getTasks(){
-        mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
         String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
         //TODO: only needed for login? if they are logged in to multiple devices this would
         // indicate the current device they are using
@@ -89,20 +104,13 @@ public class MainActivity extends ListActivity {
     }
 
     private void getTasks(String session, String deviceId){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8000/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        // prepare call in Retrofit 2.0
-        GlowAPI glowAPI = retrofit.create(GlowAPI.class);
-        //Call<TaskList> call = glowAPI.loadQuestions("android");
         Call<TaskList> call = glowAPI.loadActiveTasks(session, deviceId);
-        //asynchronous call
         call.enqueue(new Callback<TaskList>() {
             @Override
             public void onResponse(Call<TaskList> call, Response<TaskList> response) {
                 if (response.isSuccessful()) {
                     //TODO: plug into array adapter
+                    mAdapter.clear();
                     mAdapter.addAll(response.body().active_tasks);
                 } else {
                     // No Session
@@ -119,15 +127,7 @@ public class MainActivity extends ListActivity {
 
     private void logout(String session){
         //https://futurestud.io/tutorials/how-to-run-an-android-app-against-a-localhost-api
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8000/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        // prepare call in Retrofit 2.0
-        GlowAPI glowAPI = retrofit.create(GlowAPI.class);
-        //Call<TaskList> call = glowAPI.loadQuestions("android");
         Call<Object> call = glowAPI.logout(session);
-        //asynchronous call
         call.enqueue(new Callback<Object>() {
             @Override
             public void onResponse(Call<Object> call, Response<Object> response) {
@@ -150,7 +150,12 @@ public class MainActivity extends ListActivity {
 
     private void openLoginView(){
         Intent myIntent = new Intent(this, LoginActivity.class);
-        finish();
+        myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(myIntent);
+    }
+
+    private void openSettings(){
+        Intent myIntent = new Intent(this, UserProfileActivity.class);
         startActivity(myIntent);
     }
 

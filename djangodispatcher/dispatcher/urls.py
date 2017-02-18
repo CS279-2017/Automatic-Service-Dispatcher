@@ -24,6 +24,9 @@ urlpatterns = [
     url(r'^api/android/activetasks', android_views.get_active_user_tasks_android, name='active_tasks_android'),
     url(r'^api/android/update_location', android_views.update_location, name='android_location_updater'),
     url(r'^api/android/complete_task', android_views.complete_task, name='android_complete_task'),
+    url(r'^api/android/get_user', android_views.get_user, name='get_user'),
+    url(r'^api/android/update_user', android_views.update_user, name='update_user'),
+
     url(r'^accounts/android_login/$', android_views.android_login, name='android login'),
     url(r'^accounts/check_session/$', android_views.check_session, name='check_session'),
     url(r'^accounts/android_logout/$', android_views.android_logout, name='android logout'),

@@ -39,7 +39,6 @@ class Profile(models.Model):
     locations = models.ManyToManyField(Location)
     jobs = models.ManyToManyField("Job", blank=True)
     admin = models.BooleanField(default=False)
-    #session = models.ForeignKey(Session, blank=True, null=True)
     session = models.CharField(max_length=32, default="0")
     device = models.CharField(default="0", max_length=200)
 
@@ -58,6 +57,13 @@ class Profile(models.Model):
         push_service = FCMNotification(api_key=API_KEY)
         registration_id = self.device
         push_service.notify_single_device(registration_id=registration_id, message_title=title, message_body=body)
+
+    def get_json(self):
+        return {'firstName': self.user.first_name, 'lastName': self.user.last_name, 'email': self.user.email,
+                'id': self.user.pk, 'profession': self.profession.title,
+                "numActive": Task.objects.filter(worker=self, active=True).count(),
+                "numDone": Task.objects.filter(worker=self, active=False).count(),
+                "sessionId": self.session}
 
 
 class Task(models.Model):

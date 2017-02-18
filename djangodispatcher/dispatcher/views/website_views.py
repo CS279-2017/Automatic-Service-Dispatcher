@@ -251,22 +251,22 @@ def initialize(request):
 
     admin = User.objects.create_superuser(username="admin", email="sam@gmail.com", password="engineering",
                                           first_name="CSX278", last_name="Class")
-    ad = Profile.objects.create(user=admin, profession=op, location=loc5, admin=True)
+    ad = Profile.objects.create(user=admin, profession=op, admin=True)
     ad.locations.add(loc5)
     ad.save()
     u1 = User.objects.create_user(username="electrician", email="electrician", password="engineering", first_name="Joe",
                                   last_name="Electrician")
-    p1 = Profile.objects.create(user=u1, profession=elec, location=loc5, admin=False)
+    p1 = Profile.objects.create(user=u1, profession=elec, admin=False)
     p1.locations.add(loc5)
     p1.save()
     u2 = User.objects.create_user(username="mechanic", email="mechanic", password="engineering", first_name="Ben",
                                   last_name="Mechanic")
-    p2 = Profile.objects.create(user=u2, profession=mech, location=loc6, admin=False)
+    p2 = Profile.objects.create(user=u2, profession=mech, admin=False)
     p2.locations.add(loc6)
     p2.save()
     u3 = User.objects.create_user(username="mechanic2", email="mechanic2", password="engineering", first_name="Other",
                                   last_name="Mechanic")
-    p3 = Profile.objects.create(user=u3, profession=mech, location=loc7, admin=False)
+    p3 = Profile.objects.create(user=u3, profession=mech, admin=False)
     p3.locations.add(loc7)
     p3.save()
 

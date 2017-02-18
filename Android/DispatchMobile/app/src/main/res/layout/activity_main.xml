@@ -22,6 +22,12 @@
         android:layout_alignParentRight="true"
         android:id="@+id/logout"
         android:text="Logout"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/logout"
+        android:id="@+id/settings_button"
+        android:text="Settings"/>
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
