@@ -1,8 +1,10 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -14,6 +16,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -23,12 +29,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class UserProfileActivity extends AppCompatActivity {
 
     private EditText mFirstName, mLastName, mEmail;
+    private TextView mSkills;
     private String firstName, lastName, email;
-    private Button mUpdateButton;
+    private Button mUpdateButton, mUpdateSkills;
 
     private static final String mPREFERENCES = "GlowPrefs";
     private static final String mSessionId = "sessionKey";
     private static final String mDeviceId = "deviceId";
+
+    UserInformation mUser;
+    Set<String> mSkillsSet;
 
     SharedPreferences mSharedPreferences;
     Retrofit retrofit;
@@ -79,6 +89,8 @@ public class UserProfileActivity extends AppCompatActivity {
             }
         });
 
+        mSkills = (TextView)findViewById(R.id.skillsText);
+
         mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
 
         mUpdateButton = (Button) findViewById(R.id.updateUser);
@@ -88,6 +100,13 @@ public class UserProfileActivity extends AppCompatActivity {
                 if(!sessionId.equals("N/A")){
                     updateUser(sessionId);
                 }
+            }
+        });
+        mUpdateSkills = (Button) findViewById(R.id.updateSkills);
+        mUpdateSkills.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                System.out.println("update");
+                openDialog();
             }
         });
 
@@ -108,41 +127,47 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void getUser(String session){
-        Call<LoginResult> call = glowAPI.getUserInfo(session);
-        call.enqueue(new Callback<LoginResult>() {
+        Call<UserInformation> call = glowAPI.getUserInfo(session);
+        call.enqueue(new Callback<UserInformation>() {
             @Override
-            public void onResponse(Call<LoginResult> call, Response<LoginResult> response) {
+            public void onResponse(Call<UserInformation> call, Response<UserInformation> response) {
                 if (response.isSuccessful()) {
-                    mFirstName.setText(response.body().firstName);
-                    mLastName.setText(response.body().lastName);
-                    mEmail.setText(response.body().email);
+                    mUser = response.body();
+                    mSkillsSet = mUser.initializeSkillSet();
+                    mSkills.setText(mUser.getSkills(mSkillsSet));
+                    mFirstName.setText(mUser.firstName);
+                    mLastName.setText(mUser.lastName);
+                    mEmail.setText(mUser.email);
                 } else {
                     openLoginView();
                 }
             }
             @Override
-            public void onFailure(Call<LoginResult> call, Throwable t) {
+            public void onFailure(Call<UserInformation> call, Throwable t) {
                 Log.e("Error", t.getMessage());
             }
         });
     }
 
     private void updateUser(String session){
-        Call<LoginResult> call = glowAPI.updateUserInfo(session, firstName, lastName, email);
-        call.enqueue(new Callback<LoginResult>() {
+        Call<UserInformation> call = glowAPI.updateUserInfo(session, firstName, lastName, email, mUser.getSkillsIds(mSkillsSet));
+        call.enqueue(new Callback<UserInformation>() {
             @Override
-            public void onResponse(Call<LoginResult> call, Response<LoginResult> response) {
+            public void onResponse(Call<UserInformation> call, Response<UserInformation> response) {
                 if (response.isSuccessful()) {
                     makeToast("User Updated!");
-                    mFirstName.setText(response.body().firstName);
-                    mLastName.setText(response.body().lastName);
-                    mEmail.setText(response.body().email);
+                    mUser = response.body();
+                    mSkillsSet = mUser.initializeSkillSet();
+                    mSkills.setText(mUser.getSkills(mSkillsSet));
+                    mFirstName.setText(mUser.firstName);
+                    mLastName.setText(mUser.lastName);
+                    mEmail.setText(mUser.email);
                 } else {
                     openLoginView();
                 }
             }
             @Override
-            public void onFailure(Call<LoginResult> call, Throwable t) {
+            public void onFailure(Call<UserInformation> call, Throwable t) {
                 Log.e("Error", t.getMessage());
             }
         });
@@ -160,5 +185,40 @@ public class UserProfileActivity extends AppCompatActivity {
 
     public void makeToast(String message){
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    public void openDialog(){
+        final String[] options = mUser.possibleSkillsArray();
+        boolean[] defaults = mUser.createAlreadyChecked(mSkillsSet);
+        final Set<String> cache = new HashSet<String>(mSkillsSet);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(UserProfileActivity.this);
+        builder.setTitle("Select Skills").setMultiChoiceItems(options, defaults,
+                new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        if (isChecked) {
+                            mSkillsSet.add(options[which]);
+                        } else if (mSkillsSet.contains(options[which])) {
+                            mSkillsSet.remove(options[which]);
+                        }
+                    }
+                })
+                // Set the action buttons
+                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        mSkills.setText(mUser.getSkills(mSkillsSet));
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        mSkillsSet = cache;
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

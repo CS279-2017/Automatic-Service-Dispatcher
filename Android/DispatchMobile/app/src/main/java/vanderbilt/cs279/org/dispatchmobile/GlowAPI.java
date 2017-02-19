@@ -50,12 +50,13 @@ public interface GlowAPI {
 
     @FormUrlEncoded
     @POST("/api/android/get_user/")
-    Call<LoginResult> getUserInfo(@Field("session")String session);
+    Call<UserInformation> getUserInfo(@Field("session")String session);
 
     @FormUrlEncoded
     @POST("/api/android/update_user/")
-    Call<LoginResult> updateUserInfo(@Field("session")String session,
-                                     @Field("firstName")String firstName,
-                                     @Field("lastName")String lastName,
-                                     @Field("email")String email);
+    Call<UserInformation> updateUserInfo(@Field("session")String session,
+                                         @Field("firstName")String firstName,
+                                         @Field("lastName")String lastName,
+                                         @Field("email")String email,
+                                         @Field("jobs")long[] jobs);
 }

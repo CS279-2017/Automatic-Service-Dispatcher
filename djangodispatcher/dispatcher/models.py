@@ -59,11 +59,19 @@ class Profile(models.Model):
         push_service.notify_single_device(registration_id=registration_id, message_title=title, message_body=body)
 
     def get_json(self):
+        jobs = []
+        all_jobs = []
+        for j in self.jobs.all():
+            jobs.append({"name": j.name, "title": j.title, "id": j.pk})
+        for p in self.profession.jobs.all():
+            jobs.append({"name": p.name, "title": p.title, "id": p.pk})
+        for j in Job.objects.all():
+            all_jobs.append({"name": j.name, "title": j.title, "id": j.pk})
         return {'firstName': self.user.first_name, 'lastName': self.user.last_name, 'email': self.user.email,
                 'id': self.user.pk, 'profession': self.profession.title,
                 "numActive": Task.objects.filter(worker=self, active=True).count(),
                 "numDone": Task.objects.filter(worker=self, active=False).count(),
-                "sessionId": self.session}
+                "sessionId": self.session, "skills": jobs, "possibleSkills": all_jobs}
 
 
 class Task(models.Model):

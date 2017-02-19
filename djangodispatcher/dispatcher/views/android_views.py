@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login
 
 from django.views.decorators.csrf import csrf_exempt
 
-from dispatcher.models import Task, Profile, Location
+from dispatcher.models import Task, Profile, Location, Job
 
 from django.utils import timezone
 import datetime
@@ -109,13 +109,14 @@ def get_user(request):
     except Profile.DoesNotExist:
         return JsonResponse({"result": "Error parsing inputs"}, status=401)
 
-
+# todo: add ability to remove skills
 @csrf_exempt
 def update_user(request):
     session = request.POST.get('session', -1)
     first_name = request.POST.get('firstName', None)
     last_name = request.POST.get('lastName', None)
     email = request.POST.get('email', None)
+    jobs = request.POST.getlist('jobs', [])
     try:
         profile = Profile.objects.get(session=session)
         user = profile.user
@@ -124,6 +125,10 @@ def update_user(request):
         user.email = email
         user.save()
         profile.user = user
+        for j in jobs:
+            if not Profile.jobs.all().filter(pk=j) and not Profile.profession.jobs.filter(pk=j):
+                j = Job.object.get(pk=j)
+                profile.jobs.add(j)
         profile.save()
         return JsonResponse(profile.get_json())
     except Profile.DoesNotExist:
