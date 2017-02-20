@@ -8,7 +8,7 @@ from pyfcm import FCMNotification
 from django.views.decorators.csrf import csrf_exempt
 
 from dispatcher.forms import LoginForm
-from dispatcher.models import Task, Profile, Sensor, Job, Location, Profession
+from dispatcher.models import Task, Profile, Sensor, Job, Location
 from django.contrib.auth.models import User
 
 from django.utils import timezone
@@ -97,7 +97,7 @@ def delegate(request):
     smallest = -1
     # for all users that can solve the task
     # sample is 0.313+0.1 for each queued (to account for distance)
-    for user in Profile.objects.filter(profession__jobs=job, admin=False):
+    for user in Profile.objects.filter(jobs=job, admin=False):
         location = user.current_location()
         distance = math.sqrt(math.pow(abs(sensor.location.lat-location.lat), 2) +
                              math.pow(abs(sensor.location.longitude-location.longitude), 2))
@@ -139,7 +139,7 @@ def get_all_workers(request):
         for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
             tasklist.append(task.get_json())
         userlist.append({'firstName': user.user.first_name, 'lastName': user.user.last_name, 'email': user.user.email,
-                         'id': user.user.pk, 'profession': user.profession.title, 'activeTasks': tasklist,
+                         'id': user.user.pk, 'profession': user.profession, 'activeTasks': tasklist,
                          "lat": user.current_location().lat, "long": user.current_location().longitude,
                          "numActive": Task.objects.filter(worker=user, active=True).count(),
                          "numDone": Task.objects.filter(worker=user, active=False).count()})
@@ -225,25 +225,6 @@ def initialize(request):
     j5 = Job.objects.create(title="TEMPERATURE_CHANGE", name="Temperature Change")
     j6 = Job.objects.create(title="HIGH_TEMPERATURE", name="High Temperature")
 
-    op = Profession.objects.create(title="Operator")
-    op.jobs.add(j1)
-    op.jobs.add(j2)
-    op.jobs.add(j3)
-    op.jobs.add(j4)
-    op.jobs.add(j5)
-    op.jobs.add(j6)
-    op.save()
-    mech = Profession.objects.create(title="Mechanic")
-    mech.jobs.add(j3)
-    mech.jobs.add(j4)
-    mech.jobs.add(j5)
-    mech.jobs.add(j6)
-    mech.save()
-    elec = Profession.objects.create(title="Electrician")
-    elec.jobs.add(j1)
-    elec.jobs.add(j2)
-    elec.save()
-
     s1 = Sensor.objects.create(sensorId=1, location=loc1)
     s2 = Sensor.objects.create(sensorId=2, location=loc2)
     s3 = Sensor.objects.create(sensorId=3, location=loc3)
@@ -251,22 +232,38 @@ def initialize(request):
 
     admin = User.objects.create_superuser(username="admin", email="sam@gmail.com", password="engineering",
                                           first_name="CSX278", last_name="Class")
-    ad = Profile.objects.create(user=admin, profession=op, admin=True)
+    ad = Profile.objects.create(user=admin, profession="Operator", admin=True)
+    ad.jobs.add(j1)
+    ad.jobs.add(j2)
+    ad.jobs.add(j3)
+    ad.jobs.add(j4)
+    ad.jobs.add(j5)
+    ad.jobs.add(j6)
     ad.locations.add(loc5)
     ad.save()
-    u1 = User.objects.create_user(username="electrician", email="electrician", password="engineering", first_name="Joe",
+    u1 = User.objects.create_user(username="electrician", email="electrician@gmail.com", password="engineering", first_name="Joe",
                                   last_name="Electrician")
-    p1 = Profile.objects.create(user=u1, profession=elec, admin=False)
+    p1 = Profile.objects.create(user=u1, profession="Electrician", admin=False)
+    p1.jobs.add(j1)
+    p1.jobs.add(j2)
     p1.locations.add(loc5)
     p1.save()
-    u2 = User.objects.create_user(username="mechanic", email="mechanic", password="engineering", first_name="Ben",
+    u2 = User.objects.create_user(username="mechanic", email="mechanic@gmail.com", password="engineering", first_name="Ben",
                                   last_name="Mechanic")
-    p2 = Profile.objects.create(user=u2, profession=mech, admin=False)
+    p2 = Profile.objects.create(user=u2, profession="Mechanic", admin=False)
+    p2.jobs.add(j3)
+    p2.jobs.add(j4)
+    p2.jobs.add(j5)
+    p2.jobs.add(j6)
     p2.locations.add(loc6)
     p2.save()
-    u3 = User.objects.create_user(username="mechanic2", email="mechanic2", password="engineering", first_name="Other",
+    u3 = User.objects.create_user(username="mechanic2", email="mechanic2@gmail.com", password="engineering", first_name="Other",
                                   last_name="Mechanic")
-    p3 = Profile.objects.create(user=u3, profession=mech, admin=False)
+    p3 = Profile.objects.create(user=u3, profession="Mechanic", admin=False)
+    p3.jobs.add(j3)
+    p3.jobs.add(j4)
+    p3.jobs.add(j5)
+    p3.jobs.add(j6)
     p3.locations.add(loc7)
     p3.save()
 

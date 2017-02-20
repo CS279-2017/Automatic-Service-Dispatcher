@@ -2,9 +2,11 @@ package vanderbilt.cs279.org.dispatchmobile;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.widget.TextViewCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,12 +18,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -88,9 +87,24 @@ public class MainActivity extends ListActivity {
     @Override
     protected void onListItemClick(ListView list, View view, int position, long id) {
         super.onListItemClick(list, view, position, id);
-        Task selectedItem = (Task) getListView().getItemAtPosition(position);
-        System.out.println(selectedItem.toString());
-        //mText.setText("You clicked " + selectedItem + " at position " + position);
+        final Task selectedItem = (Task) getListView().getItemAtPosition(position);
+        String message = selectedItem.name+" at sensor "+selectedItem.sensor;
+        //TODO: finish task
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);//getActivity());
+        builder.setMessage(message).setTitle("Complete Task")
+                .setPositiveButton("Complete", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
+                        completeTask(sessionId, selectedItem.taskId);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void getTasks(){
@@ -105,6 +119,28 @@ public class MainActivity extends ListActivity {
 
     private void getTasks(String session, String deviceId){
         Call<TaskList> call = glowAPI.loadActiveTasks(session, deviceId);
+        call.enqueue(new Callback<TaskList>() {
+            @Override
+            public void onResponse(Call<TaskList> call, Response<TaskList> response) {
+                if (response.isSuccessful()) {
+                    //TODO: plug into array adapter
+                    mAdapter.clear();
+                    mAdapter.addAll(response.body().active_tasks);
+                } else {
+                    // No Session
+                    openLoginView();
+                }
+            }
+            @Override
+            public void onFailure(Call<TaskList> call, Throwable t) {
+                // something went completely south (like no internet connection)
+                Log.e("Error", t.getMessage());
+            }
+        });
+    }
+
+    private void completeTask(String session, long taskId){
+        Call<TaskList> call = glowAPI.completeTask(session, taskId);
         call.enqueue(new Callback<TaskList>() {
             @Override
             public void onResponse(Call<TaskList> call, Response<TaskList> response) {

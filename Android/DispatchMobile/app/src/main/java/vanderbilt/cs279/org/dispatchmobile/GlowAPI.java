@@ -49,6 +49,10 @@ public interface GlowAPI {
     Call<TaskList> loadActiveTasks(@Field("session")String session, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
+    @POST("/api/android/complete_task/")
+    Call<TaskList> completeTask(@Field("session")String session, @Field("taskId")long taskId);
+
+    @FormUrlEncoded
     @POST("/api/android/get_user/")
     Call<UserInformation> getUserInfo(@Field("session")String session);
 
@@ -58,5 +62,6 @@ public interface GlowAPI {
                                          @Field("firstName")String firstName,
                                          @Field("lastName")String lastName,
                                          @Field("email")String email,
+                                         @Field("profession") String profession,
                                          @Field("jobs")long[] jobs);
 }

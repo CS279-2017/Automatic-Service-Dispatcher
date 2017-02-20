@@ -28,9 +28,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class UserProfileActivity extends AppCompatActivity {
 
-    private EditText mFirstName, mLastName, mEmail;
+    private EditText mFirstName, mLastName, mEmail, mProfession;
     private TextView mSkills;
-    private String firstName, lastName, email;
+    private String firstName, lastName, email, profession;
     private Button mUpdateButton, mUpdateSkills;
 
     private static final String mPREFERENCES = "GlowPrefs";
@@ -88,6 +88,20 @@ public class UserProfileActivity extends AppCompatActivity {
                 // do stuff
             }
         });
+        mProfession = (EditText) findViewById(R.id.professionEdit);
+        mProfession.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                profession = s.toString();
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+                // do stuff
+            }
+        });
 
         mSkills = (TextView)findViewById(R.id.skillsText);
 
@@ -138,6 +152,7 @@ public class UserProfileActivity extends AppCompatActivity {
                     mFirstName.setText(mUser.firstName);
                     mLastName.setText(mUser.lastName);
                     mEmail.setText(mUser.email);
+                    mProfession.setText(mUser.profession);
                 } else {
                     openLoginView();
                 }
@@ -150,7 +165,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void updateUser(String session){
-        Call<UserInformation> call = glowAPI.updateUserInfo(session, firstName, lastName, email, mUser.getSkillsIds(mSkillsSet));
+        Call<UserInformation> call = glowAPI.updateUserInfo(session, firstName, lastName, email, profession, mUser.getSkillsIds(mSkillsSet));
         call.enqueue(new Callback<UserInformation>() {
             @Override
             public void onResponse(Call<UserInformation> call, Response<UserInformation> response) {
@@ -162,6 +177,7 @@ public class UserProfileActivity extends AppCompatActivity {
                     mFirstName.setText(mUser.firstName);
                     mLastName.setText(mUser.lastName);
                     mEmail.setText(mUser.email);
+                    mProfession.setText(mUser.profession);
                 } else {
                     openLoginView();
                 }

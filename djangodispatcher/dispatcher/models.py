@@ -8,12 +8,12 @@ from django.utils import timezone
 
 from pyfcm import FCMNotification
 
-class Profession(models.Model):
-    title = models.CharField(max_length=30, default="None")
-    jobs = models.ManyToManyField("Job", blank=True)
-
-    def __unicode__(self):
-        return self.title
+# class Profession(models.Model):
+#     title = models.CharField(max_length=30, default="None")
+#     # jobs = models.ManyToManyField("Job", blank=True)
+#
+#     def __unicode__(self):
+#         return self.title
 
 
 class Job(models.Model):
@@ -35,7 +35,7 @@ class Location(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profession = models.ForeignKey(Profession)
+    profession = models.CharField(max_length=30, default="None")#models.ForeignKey(Profession)
     locations = models.ManyToManyField(Location)
     jobs = models.ManyToManyField("Job", blank=True)
     admin = models.BooleanField(default=False)
@@ -63,12 +63,10 @@ class Profile(models.Model):
         all_jobs = []
         for j in self.jobs.all():
             jobs.append({"name": j.name, "title": j.title, "id": j.pk})
-        for p in self.profession.jobs.all():
-            jobs.append({"name": p.name, "title": p.title, "id": p.pk})
         for j in Job.objects.all():
             all_jobs.append({"name": j.name, "title": j.title, "id": j.pk})
         return {'firstName': self.user.first_name, 'lastName': self.user.last_name, 'email': self.user.email,
-                'id': self.user.pk, 'profession': self.profession.title,
+                'id': self.user.pk, 'profession': self.profession,
                 "numActive": Task.objects.filter(worker=self, active=True).count(),
                 "numDone": Task.objects.filter(worker=self, active=False).count(),
                 "sessionId": self.session, "skills": jobs, "possibleSkills": all_jobs}

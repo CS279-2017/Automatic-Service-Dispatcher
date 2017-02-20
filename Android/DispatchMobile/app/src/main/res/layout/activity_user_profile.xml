@@ -40,6 +40,16 @@
         android:layout_height="wrap_content"
         android:id="@+id/emailEdit"
         android:hint="Email"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/professionText"
+        android:text="Profession"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/professionEdit"
+        android:hint="Profession"/>
 
     <LinearLayout
         android:layout_width="match_parent"

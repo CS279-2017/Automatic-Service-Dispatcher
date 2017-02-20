@@ -31,19 +31,15 @@ def complete_task(request):
     session = request.POST.get('session', -1)
     task_id = request.POST.get('taskId', -1)
     try:
-        profile = Profile.objects.get(session=session)
+        user = Profile.objects.get(session=session)
         task = Task.objects.get(pk=task_id)
         task.active = False
         task.datecompleted = timezone.now()
         task.save()
-        user = Profile.objects.get(user=request.user)
-        result = {'completed_tasks': [], 'active_tasks': []}
-        for task in Task.objects.filter(worker=user, active=False):
-            if task.active:
-                result["active_tasks"].append(task.get_json())
-            else:
-                result["completed_tasks"].append(task.get_json())
-        return JsonResponse(result)
+        mytask = []
+        for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
+            mytask.append(task.get_json())
+        return JsonResponse({'active_tasks': mytask})
     except Profile.DoesNotExist:
         return JsonResponse({"result": "Invalid Session!"}, status=401)
     except Task.DoesNotExist:
@@ -116,6 +112,7 @@ def update_user(request):
     first_name = request.POST.get('firstName', None)
     last_name = request.POST.get('lastName', None)
     email = request.POST.get('email', None)
+    profession = request.POST.get('profession', None)
     jobs = request.POST.getlist('jobs', [])
     try:
         profile = Profile.objects.get(session=session)
@@ -124,10 +121,18 @@ def update_user(request):
         user.last_name = last_name
         user.email = email
         user.save()
+        profile.profession = profession
         profile.user = user
+        # remove ones not in list
+        for j in profile.jobs.all():
+            if j in jobs:
+                pass
+            else:
+                profile.jobs.remove(j)
+        # add everything in list
         for j in jobs:
-            if not Profile.jobs.all().filter(pk=j) and not Profile.profession.jobs.filter(pk=j):
-                j = Job.object.get(pk=j)
+            if not profile.jobs.filter(pk=j):  # and not Profile.profession.jobs.filter(pk=j):
+                j = Job.objects.get(pk=j)
                 profile.jobs.add(j)
         profile.save()
         return JsonResponse(profile.get_json())
