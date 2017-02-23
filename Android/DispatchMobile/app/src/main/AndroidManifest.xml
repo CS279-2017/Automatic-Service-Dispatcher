@@ -19,11 +19,11 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
         </activity>
 
         <service
@@ -32,6 +32,17 @@
             android:exported="false" />
 
         <activity android:name=".MainActivity" />
+        <activity
+            android:name=".NavDrawAct">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
 
         <service
             android:name=".MyFirebaseMessagingService"

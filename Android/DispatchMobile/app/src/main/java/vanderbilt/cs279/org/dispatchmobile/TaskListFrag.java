@@ -1,13 +1,11 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
-import android.app.ListActivity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,13 +26,15 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import vanderbilt.cs279.org.dispatchmobile.R;
+/**
+ * Created by gpettet on 2017-02-23.
+ */
 
-public class MainActivity extends ListActivity {
+public class TaskListFrag extends Fragment {
 
     private TextView mText;
     private Button mLogoutButton, mSettingsButton;
-    private TasksAdapter mAdapter;
+    private TaskListFrag.TasksAdapter mAdapter;
 
     // Shared Preferences for Session
     private static final String mPREFERENCES = "GlowPrefs";
@@ -46,20 +46,21 @@ public class MainActivity extends ListActivity {
     GlowAPI glowAPI;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        View mView = inflater.inflate(R.layout.activity_main, container, false);
 
-        mText = (TextView) findViewById(R.id.mainText);
-        mLogoutButton = (Button) findViewById(R.id.logout);
+        mText = (TextView) mView.findViewById(R.id.mainText);
+        mLogoutButton = (Button) mView.findViewById(R.id.logout);
         mLogoutButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+                mSharedPreferences = getContext().getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
                 String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
                 logout(sessionId);
             }
         });
-        mSettingsButton = (Button) findViewById(R.id.settings_button);
+        mSettingsButton = (Button) mView.findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 openSettings();
@@ -67,8 +68,11 @@ public class MainActivity extends ListActivity {
         });
 
         ArrayList<Task> arrayOfUsers = new ArrayList<Task>();
-        mAdapter = new TasksAdapter(this, arrayOfUsers);
-        setListAdapter(mAdapter);
+        mAdapter = new TaskListFrag.TasksAdapter(getContext(), arrayOfUsers);
+
+        ListView mListView = mView.findViewById(R.id.list);
+
+        mListView.setAdapter(mAdapter);
 
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://10.0.2.2:8000/")
@@ -76,7 +80,9 @@ public class MainActivity extends ListActivity {
                 .build();
         glowAPI = retrofit.create(GlowAPI.class);
 
-        mSharedPreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+        mSharedPreferences = getContext().getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+
+        return mView;
     }
 
     @Override
@@ -100,11 +106,11 @@ public class MainActivity extends ListActivity {
                         completeTask(sessionId, selectedItem.taskId);
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                    }
-                });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -242,4 +248,5 @@ public class MainActivity extends ListActivity {
             return time;
         }
     }
+
 }
