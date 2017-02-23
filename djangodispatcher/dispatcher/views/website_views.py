@@ -30,21 +30,27 @@ def get_current_user(request):
     return JsonResponse({'username': user.username, 'firstName': user.first_name, 'lastName': user.last_name,
                          'email': user.email, 'id': user.pk})
 
-
+# tODO change name
 @login_required
-def get_active_user_tasks(request):
+def get_possible_tasks(request):
     user = Profile.objects.get(user=request.user)
-    mytask = []
-    for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
-        mytask.append(task.get_json())
-    return JsonResponse({'active_tasks': mytask})
+    my_tasks = []
+    # for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
+    for task in user.task_set.all().order_by("-date"):
+        my_tasks.append(task.get_json())
+    return JsonResponse({'active_tasks': [user.current_task()]})
 
+# TODO implement - change all actives to this in webapp
+@login_required
+def get_my_task(request):
+    user = Profile.objects.get(user=request.user)
+    return JsonResponse(user.current_task())
 
 @login_required
 def get_completed_user_tasks(request):
     user = Profile.objects.get(user=request.user)
     mytask = []
-    for task in Task.objects.filter(worker=user, active=False).order_by("-date"):
+    for task in user.tasks.filter(active=False).order_by("-date"):
         mytask.append(task.get_json())
     return JsonResponse({'completed_tasks': mytask})
 
@@ -59,7 +65,7 @@ def complete_task(request):
         task.save()
         user = Profile.objects.get(user=request.user)
         result = {'completed_tasks': [], 'active_tasks': []}
-        for task in Task.objects.filter(worker=user):
+        for task in user.tasks.all():
             if task.active:
                 result["active_tasks"].append(task.get_json())
             else:
@@ -97,6 +103,7 @@ def delegate(request):
     smallest = -1
     # for all users that can solve the task
     # sample is 0.313+0.1 for each queued (to account for distance)
+    task = Task.objects.create(sensor=sensor, job=job, date=date)
     for user in Profile.objects.filter(jobs=job, admin=False):
         location = user.current_location()
         distance = math.sqrt(math.pow(abs(sensor.location.lat-location.lat), 2) +
@@ -105,12 +112,15 @@ def delegate(request):
         if smallest == -1 or value < smallest:
             correct_user = user
             smallest = value
+        task.possible_workers.add(user)
+        user.push_notification(title="New Task", body=metric+" at Sensor "+sensorId)
     if correct_user is None:
         return JsonResponse({"error": "no user found"})
-    task = Task.objects.create(worker=correct_user, sensor=sensor, job=job, date=date)
+    # task = Task.objects.create(worker=correct_user, sensor=sensor, job=job, date=date)
+    task.save()
     # Now push notification to user
-    correct_user.push_notification(title="New Task", body=metric+" at Sensor "+sensorId)
-    return JsonResponse({"result": "success", 'workerUsername': task.worker.user.username, 'workerId': task.worker.pk,
+    # correct_user.push_notification(title="New Task", body=metric+" at Sensor "+sensorId)
+    return JsonResponse({"result": "success", # 'workerUsername': task.worker.user.username, 'workerId': task.worker.pk,
                          'name': task.job.name, 'date': task.date, 'taskId': task.pk})
 
 
@@ -131,21 +141,21 @@ def create_sample_task(request):
     return JsonResponse({})
 
 # operator APIs
+# todo: task vs no task
 @login_required
 def get_all_workers(request):
     userlist = []
     for user in Profile.objects.filter(admin=False):
-        tasklist = []
-        for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
-            tasklist.append(task.get_json())
+        tasklist = [user.current_task()]
         userlist.append({'firstName': user.user.first_name, 'lastName': user.user.last_name, 'email': user.user.email,
                          'id': user.user.pk, 'profession': user.profession, 'activeTasks': tasklist,
                          "lat": user.current_location().lat, "long": user.current_location().longitude,
-                         "numActive": Task.objects.filter(worker=user, active=True).count(),
-                         "numDone": Task.objects.filter(worker=user, active=False).count()})
+                         "numActive": user.tasks.filter(active=True).count(),
+                         "numDone": user.tasks.filter(active=False).count()})
     return JsonResponse({"users": userlist})
 
 
+# todo: good, problem, problem but help on the way
 @login_required
 def get_all_sensors(request):
     sensor_list = []
@@ -267,15 +277,19 @@ def initialize(request):
     p3.locations.add(loc7)
     p3.save()
 
-    Task.objects.create(worker=p1, sensor=s1, job=j1, date=datetime.datetime(2016, 11, 28, 14, 11, 56, tzinfo=pytz.utc),
-                        datecompleted=datetime.datetime(2016, 11, 28, 18, 5, 48, tzinfo=pytz.utc), active=False)
-    Task.objects.create(worker=p1, sensor=s2, job=j2, date=datetime.datetime(2016, 11, 28, 16, 48, 40, tzinfo=pytz.utc),
-                        datecompleted=datetime.datetime(2016, 11, 28, 20, 7, 45, tzinfo=pytz.utc), active=False)
-    Task.objects.create(worker=p1, sensor=s4, job=j2, date=datetime.datetime(2016, 12, 1, 20, 30, 40, tzinfo=pytz.utc),
-                        datecompleted=datetime.datetime(2016, 12, 1, 20, 30, 40, tzinfo=pytz.utc), active=True)
-    Task.objects.create(worker=p2, sensor=s3, job=j4, date=datetime.datetime(2016, 12, 1, 18, 11, 40, tzinfo=pytz.utc),
+    t1 = Task.objects.create(sensor=s1, job=j1, date=datetime.datetime(2016, 11, 28, 14, 11, 56, tzinfo=pytz.utc),
+                             datecompleted=datetime.datetime(2016, 11, 28, 18, 5, 48, tzinfo=pytz.utc), active=False)
+    p1.tasks.add(t1)
+    t2 = Task.objects.create(sensor=s2, job=j2, date=datetime.datetime(2016, 11, 28, 16, 48, 40, tzinfo=pytz.utc),
+                             datecompleted=datetime.datetime(2016, 11, 28, 20, 7, 45, tzinfo=pytz.utc), active=False)
+    p2.tasks.add(t2)
+    t3 = Task.objects.create(sensor=s4, job=j2, date=datetime.datetime(2016, 12, 1, 20, 30, 40, tzinfo=pytz.utc),
+                             datecompleted=datetime.datetime(2016, 12, 1, 20, 30, 40, tzinfo=pytz.utc), active=True)
+    p1.tasks.add(t3)
+    Task.objects.create(sensor=s3, job=j4, date=datetime.datetime(2016, 12, 1, 18, 11, 40, tzinfo=pytz.utc),
                         datecompleted=datetime.datetime(2016, 12, 1, 23, 46, 59, tzinfo=pytz.utc), active=False)
-    Task.objects.create(worker=p2, sensor=s4, job=j3, date=datetime.datetime(2016, 12, 2, 12, 11, 40, tzinfo=pytz.utc),
-                        datecompleted=datetime.datetime(2016, 12, 2, 12, 11, 40, tzinfo=pytz.utc), active=True)
+    t4 = Task.objects.create(sensor=s4, job=j3, date=datetime.datetime(2016, 12, 2, 12, 11, 40, tzinfo=pytz.utc),
+                             datecompleted=datetime.datetime(2016, 12, 2, 12, 11, 40, tzinfo=pytz.utc), active=True)
+    p2.tasks.add(t4)
 
     return JsonResponse({})

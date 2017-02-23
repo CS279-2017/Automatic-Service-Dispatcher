@@ -8,13 +8,6 @@ from django.utils import timezone
 
 from pyfcm import FCMNotification
 
-# class Profession(models.Model):
-#     title = models.CharField(max_length=30, default="None")
-#     # jobs = models.ManyToManyField("Job", blank=True)
-#
-#     def __unicode__(self):
-#         return self.title
-
 
 class Job(models.Model):
     title = models.CharField(max_length=30, default="None")
@@ -35,15 +28,25 @@ class Location(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profession = models.CharField(max_length=30, default="None")#models.ForeignKey(Profession)
+    profession = models.CharField(max_length=30, default="None")  # models.ForeignKey(Profession)
     locations = models.ManyToManyField(Location)
     jobs = models.ManyToManyField("Job", blank=True)
+    tasks = models.ManyToManyField("Task", blank=True)
+
     admin = models.BooleanField(default=False)
     session = models.CharField(max_length=32, default="0")
     device = models.CharField(default="0", max_length=200)
 
     def __unicode__(self):
         return self.user.username
+
+    def current_task(self):
+        task = self.tasks.filter(active=True)
+        if not task:
+            return {}
+        else:
+            task = task[0]
+            return task.get_json()
 
     def num_active_tasks(self):
         return self.task_set.filter(active=True).count()
@@ -73,7 +76,7 @@ class Profile(models.Model):
 
 
 class Task(models.Model):
-    worker = models.ForeignKey(Profile)
+    possible_workers = models.ManyToManyField(Profile, blank=True)
     sensor = models.ForeignKey("Sensor", blank=True, null=True)
     job = models.ForeignKey(Job, blank=True, null=True)
     date = models.DateTimeField(default=timezone.now())
@@ -92,7 +95,7 @@ class Task(models.Model):
         if not self.active:
             time = (self.datecompleted-self.date)
             hoursOpen = time.days*24+time.seconds/3600
-        return {'taskId': self.pk, 'workerId': self.worker.pk, 'name': self.job.name, 'date': self.date,
+        return {'taskId': self.pk, 'name': self.job.name, 'date': self.date,  # 'workerId': self.worker.pk,
                 "sensor": self.sensor.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen}
 
 class Sensor(models.Model):

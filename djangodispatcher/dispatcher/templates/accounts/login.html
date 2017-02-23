@@ -2,54 +2,54 @@
 <html class="no-js">
 <head>
     <link rel="stylesheet" href="../../static/bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../static/custom.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.0/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.0/react-dom.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
 </head>
-<body>
+<body id="background">
 <style>
 div.login_container {
     width: 100%;
     margin: 0 auto; 
 }
 </style>
-<div class="container">
-<h2 class="text-center">Login to Your Account:</h2><br>
-
-{% if displaymessage %}
-<div class="row">
-<div class="col-sm-offset-4 col-sm-4 alert alert-danger" role="alert">
-  <p class="text-center">Your username and password don't match! Try again.</p>
-</div>
-</div>
-{% endif %}
-<div class="login_container">
-<div class="container-fluid">
-<form class="form-horizontal" method="post" action="">
-{% csrf_token %}
-  <div class="form-group">
-    <label class="col-sm-offset-3 col-sm-2 control-label">Username</label>
-    <div class="col-sm-2">
-      {{ form.username }}
+    <div class="container">
+        <div class="col-md-12 text-center">
+            <img src="/static/react/transparentlogo.png" height="250px"/>
+        </div>
+    {% if displaymessage %}
+    <div class="row">
+        <div class="col-sm-offset-4 col-sm-4 alert alert-danger" role="alert">
+          <p class="text-center white">Your username and password don't match! Try again.</p>
+        </div>
     </div>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-offset-3 col-sm-2 control-label">Password</label>
-    <div class="col-sm-2">
-      {{ form.password }}
+    {% endif %}
+        <div class="container-fluid">
+            <form class="form-horizontal" method="post" action="">
+            {% csrf_token %}
+              <div class="form-group">
+                <!--<label class="col-sm-offset-3 col-sm-2 control-label white">Username</label>-->
+                <div class="col-sm-offset-5 col-sm-2">
+                  {{ form.username }}
+                </div>
+              </div>
+              <div class="form-group">
+                <!--<label class="col-sm-offset-3 col-sm-2 control-label white">Password</label>-->
+                <div class="col-sm-offset-5 col-sm-2">
+                  {{ form.password }}
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-offset-6 col-sm-6">
+                  <input type="submit" class="btn btn-default" value="Login"/>
+                <input type="hidden" name="next" value="{{ next }}" />
+                </div>
+              </div>
+            </form>
+        </div>
     </div>
-  </div>
-  <div class="form-group">
-    <div class="col-sm-offset-5 col-sm-6">
-      <input type="submit" class="btn btn-default" value="Login"/>
-	<input type="hidden" name="next" value="{{ next }}" />
-    </div>
-  </div>
-</form>
-</div>
-</div>
-</div>
 </body>
 <script src="../../static/bundle.js"></script>
 </html>

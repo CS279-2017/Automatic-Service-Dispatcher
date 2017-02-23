@@ -32,7 +32,7 @@ public interface GlowAPI {
 
     //Todo: some sort of session key
 
-    @GET("/api/android/activetasks/")
+    @GET("/api/android/possible_tasks/")
     Call<TaskList> loadActiveTasks();
 
     // Location Update
@@ -45,7 +45,7 @@ public interface GlowAPI {
 
 
     @FormUrlEncoded
-    @POST("/api/android/activetasks/")
+    @POST("/api/android/possible_tasks/")
     Call<TaskList> loadActiveTasks(@Field("session")String session, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded

@@ -15,7 +15,7 @@ export function getDataUpdater(data){
 
 export function fetchCurrentUserTasks(){
     return function (dispatch){
-        return $.get('/api/activetasks', function(result){
+        return $.get('/api/my_task', function(result){
             dispatch(getDataUpdater(result))
         }.bind(this));
     }

@@ -4,6 +4,8 @@ import UserPanel from './UserPanel'
 import Map from './Map'
 import TaskTrend from './TaskTrend'
 import SiteTable from './SiteTable'
+import NavBar from './NavBar'
+import SideBar2 from './SideBar2'
 
 var ControlCenter = React.createClass({
     componentDidMount: function(){
@@ -23,16 +25,11 @@ var ControlCenter = React.createClass({
         trends.push(<div className="col-md-4" key={1}><TaskTrend title="Total Users" number={this.props.numUsers}/></div>);
         trends.push(<div className="col-md-4" key={2}><TaskTrend title="Total Tasks Done" number={this.props.numDone}/></div>);
         trends.push(<div className="col-md-4" key={3}><TaskTrend title="Total Tasks Pending" number={this.props.numActive}/></div>);
-        return(<div>
-                <h1 className="text-center">{this.props.user.firstName+" "+this.props.user.lastName}
-                <span className="logout-btn"><a className="btn btn-warning" href="/accounts/logout/">Logout</a></span></h1>
-                <ul className="nav nav-tabs" role="tablist">
-                    <li role="presentation" className="active"><a href="#map" aria-controls="home" role="tab" data-toggle="tab">Sensor Map</a></li>
-                    <li role="presentation"><a href="#users" aria-controls="profile" role="tab" data-toggle="tab">All Users</a></li>
-                    <li role="presentation"><a href="#trends" aria-controls="trends" role="tab" data-toggle="tab">Trends</a></li>
-                  </ul>
+        return(<div className="fluid-body col-md-12">
+                <NavBar user={this.props.user}/>
+                <SideBar2/>
                   <div className="tab-content">
-                    <div role="tabpanel" className="tab-pane active text-center" id="map"><br/><br/>
+                    <div role="tabpanel" className="tab-pane active text-center" id="map">
                     <Map sensors={this.props.sensors} users={this.props.allUsers}/>
                     </div>
                     <div role="tabpanel" className="tab-pane" id="users"><br/><br/>{userlist}</div>

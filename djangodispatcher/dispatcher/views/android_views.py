@@ -9,9 +9,22 @@ from django.utils import timezone
 import datetime
 
 
-
+# TODO change name
 @csrf_exempt
-def get_active_user_tasks_android(request):
+def get_my_task(request):
+    session = request.POST.get('session', -1)
+    deviceId = request.POST['deviceId']
+    try:
+        user = Profile.objects.get(session=session)
+        user.device = deviceId
+        user.save()
+        return JsonResponse(user.current_task())
+    except Profile.DoesNotExist:
+        return JsonResponse({"result": "bad"}, status=401)
+
+# TODO change name
+@csrf_exempt
+def get_possible_tasks(request):
     session = request.POST.get('session', -1)
     deviceId = request.POST['deviceId']
     try:
@@ -19,7 +32,8 @@ def get_active_user_tasks_android(request):
         user.device = deviceId
         user.save()
         mytask = []
-        for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
+        # for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
+        for task in user.task_set.all().order_by("-date"):
             mytask.append(task.get_json())
         return JsonResponse({'active_tasks': mytask})
     except Profile.DoesNotExist:
@@ -37,7 +51,7 @@ def complete_task(request):
         task.datecompleted = timezone.now()
         task.save()
         mytask = []
-        for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
+        for task in user.task_set.all().order_by("-date"):
             mytask.append(task.get_json())
         return JsonResponse({'active_tasks': mytask})
     except Profile.DoesNotExist:

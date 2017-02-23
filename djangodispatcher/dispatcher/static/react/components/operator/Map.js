@@ -5,7 +5,7 @@ var Map = React.createClass( {
   componentDidMount: function() {
     var nashville = {lat: 36.1627, lng: -86.7816};
     this.map = new google.maps.Map(this.refs.map, {
-      zoom: 9,
+      zoom: 10,
       center: nashville
     });
   },
@@ -17,8 +17,11 @@ var Map = React.createClass( {
             var marker = new google.maps.Marker({
               position: sensor,
               map: this.map,
-              label: "S"+newProps.sensors[i].sensor,
+              icon: "https://maps.google.com/mapfiles/ms/micons/water.png"
+              //label: "S"+newProps.sensors[i].sensor,
             });
+            var infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.sensors[i].sensor+"</p>" });
+            this.bindInfoWindow(marker, this.map, infowindow)
             this.state.sensorMarkers.push(marker)
         }
     }
@@ -28,8 +31,11 @@ var Map = React.createClass( {
             var marker = new google.maps.Marker({
               position: sensor,
               map: this.map,
-              label: newProps.users[i].firstName,
+              icon: "https://maps.google.com/mapfiles/ms/micons/truck.png"
+              //label: newProps.users[i].firstName,
             });
+            var infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+"</p>" });
+            this.bindInfoWindow(marker, this.map, infowindow)
             this.state.sensorMarkers.push(marker)
         }
     }
@@ -39,16 +45,22 @@ var Map = React.createClass( {
           this.state.sensorMarkers[i].setMap(null);
         }
   },
+  bindInfoWindow: function(marker, map, infowindow) {
+        marker.addListener('click', function() {
+            infowindow.open(map, this);
+        });
+    },
   render: function() {
     const mapStyle = {
-      width: '84%',
-      height: 400,
+      width: '100%',
+      marginLeft: 20,
+      height: 540,
       border: '1px solid black'
     };
 
     return (
       <div className="text-center">
-        <div ref="map" style={mapStyle} className="col-md-offset-1">I should be a map!</div>
+        <div ref="map" style={mapStyle} >I should be a map!</div>
       </div>
     );
   }

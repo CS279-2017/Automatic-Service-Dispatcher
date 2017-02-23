@@ -2,6 +2,7 @@ import { connect } from 'react-redux'
 import { fetchCurrentUser, fetchCurrentUserTasks, fetchCompletedUserTasks,
  completeTask} from '../../actions'
 import TaskPanel from './TaskPanel'
+import ActiveTask from './ActiveTask'
 
 var MainPage = React.createClass({
     componentDidMount: function(){
@@ -11,10 +12,12 @@ var MainPage = React.createClass({
     },
     render: function() {
         return(<div>
+
                 <h1 className="text-center">{this.props.user.firstName+" "+this.props.user.lastName}
                 <span className="logout-btn"><a className="btn btn-warning" href="/accounts/logout/">Logout</a></span></h1>
                 <div className="col-md-6">
-                    <TaskPanel tasks={this.props.user.active_tasks} type="Active" completeTask={this.props.completeTask}/>
+                    <ActiveTask name={this.props.name} date={this.props.date} sensor={this.props.sensor}
+                    completeTask={this.props.completeTask} taskId={this.props.taskId}/>
                 </div>
                 <div className="col-md-6">
                     <TaskPanel tasks={this.props.user.completed_tasks} type="Completed"/>
@@ -25,11 +28,18 @@ var MainPage = React.createClass({
 
 const mapStateToProps = (state) => {
     //updateCompany
-    console.log(state.getCurrentUser)
+    //console.log(state.getCurrentUser)
     return {
         user: state.getCurrentUser,
-        active_tasks: state.getCurrentUser.active_tasks,
-        completed_tasks: state.getCurrentUser.completedTasks
+        completed_tasks: state.getCurrentUser.completedTasks,
+
+        taskId: state.getCurrentUser.taskId,
+        name: state.getCurrentUser.name,
+        date: state.getCurrentUser.date,
+        workerId: state.getCurrentUser.workerId,
+        sensor: state.getCurrentUser.sensor,
+        dateCompleted: state.getCurrentUser.dateCompleted,
+        hourOpen: state.getCurrentUser.hoursOpen
     };
 };
 
