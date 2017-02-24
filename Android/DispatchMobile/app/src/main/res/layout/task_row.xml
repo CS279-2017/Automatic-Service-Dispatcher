@@ -8,21 +8,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#000"
+        android:textSize="55px"
+        android:textStyle="bold"
         android:text="Task" />
-    <TextView
-        android:id="@+id/dateTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#000"
-        android:layout_below="@id/taskTitle"
-        android:text="Date" />
     <TextView
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:textColor="#000"
-        android:text="Time"
-        android:layout_alignParentRight="true"/>
+        android:textColor="#323232"
+        android:layout_alignBottom="@+id/locationImage"
+        android:text="Time" />
+    <ImageView
+        android:id="@+id/locationImage"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/additionalData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#59b048"
+        android:layout_below="@id/locationImage"
+        android:background="#0000"
+        android:padding="0px"
+        android:layout_alignParentRight="true"
+        android:text="Start" />
 
 </RelativeLayout>

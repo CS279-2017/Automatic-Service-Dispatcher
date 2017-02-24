@@ -172,7 +172,7 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
     Redirects to task view if authenticated
     */
     private void openTaskView(){
-        Intent myIntent = new Intent(this, MainActivity.class);
+        Intent myIntent = new Intent(this, NavDrawAct.class);
         finish();
         startActivity(myIntent);
     }

@@ -31,13 +31,14 @@ public interface GlowAPI {
     Call<Object> logout(@Field("session")String session);
 
     //Todo: some sort of session key
-
-    @GET("/api/android/possible_tasks/")
-    Call<TaskList> loadActiveTasks();
+    @GET("https://maps.googleapis.com/maps/api/staticmap")
+    Call<TaskList> loadMapIcon(@Query("center") String center, @Query("zoom") String zoom,
+                                   @Query("size") String size, @Query("maptype") String maptype,
+                                   @Query("key") String key);
 
     // Location Update
     @FormUrlEncoded
-    @POST("someapi/locationupdate") // todo web server location api
+    @POST("/api/android/update_location") // todo web server location api
     Call<Object> updateLocation(@Field("session") String session,
                                 @Field("timeStamp") long timestamp,
                                 @Field("latitude") double latitude,
@@ -47,10 +48,6 @@ public interface GlowAPI {
     @FormUrlEncoded
     @POST("/api/android/possible_tasks/")
     Call<TaskList> loadActiveTasks(@Field("session")String session, @Field("deviceId")String deviceId);
-
-    @FormUrlEncoded
-    @POST("/api/android/complete_task/")
-    Call<TaskList> completeTask(@Field("session")String session, @Field("taskId")long taskId);
 
     @FormUrlEncoded
     @POST("/api/android/get_user/")
@@ -64,4 +61,12 @@ public interface GlowAPI {
                                          @Field("email")String email,
                                          @Field("profession") String profession,
                                          @Field("jobs")long[] jobs);
+
+    @FormUrlEncoded
+    @POST("/api/android/complete_task/")
+    Call<TaskList> completeTask(@Field("session")String session, @Field("taskId")long taskId);
+
+    @FormUrlEncoded
+    @POST("/api/android/start_task/")
+    Call<Task> startTask(@Field("session")String session, @Field("taskId")long taskId);
 }

@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from dispatcher.models import Task, Profile, Location, Job
 
 from django.utils import timezone
-import datetime
+import datetime, urllib, base64
 
 
 # TODO change name
@@ -32,9 +32,20 @@ def get_possible_tasks(request):
         user.device = deviceId
         user.save()
         mytask = []
-        # for task in Task.objects.filter(worker=user, active=True).order_by("-date"):
+        images = {}
         for task in user.task_set.all().order_by("-date"):
-            mytask.append(task.get_json())
+            intermediate = task.get_json()
+            location = task.sensor.location
+            location = str(location.lat)+","+str(location.longitude)
+            try:
+                loc = images[location]
+                intermediate["image"] = loc
+            except KeyError:
+                result = urllib.urlopen("https://maps.googleapis.com/maps/api/staticmap?center="+location+"&zoom=15&size=400x400&markers=color:red|label:C|"+location+"&maptype=roadmap&key=AIzaSyCIlABW-dOGWbwCJP6o-KwNzbJhx73H_7k").read()
+                encoded_string = base64.b64encode(result)
+                images[location] = encoded_string
+                intermediate["image"] = encoded_string
+            mytask.append(intermediate)
         return JsonResponse({'active_tasks': mytask})
     except Profile.DoesNotExist:
         return JsonResponse({"result": "bad"}, status=401)
@@ -54,6 +65,26 @@ def complete_task(request):
         for task in user.task_set.all().order_by("-date"):
             mytask.append(task.get_json())
         return JsonResponse({'active_tasks': mytask})
+    except Profile.DoesNotExist:
+        return JsonResponse({"result": "Invalid Session!"}, status=401)
+    except Task.DoesNotExist:
+        return JsonResponse({"result": "error"})
+
+
+@csrf_exempt
+def start_task(request):
+    session = request.POST.get('session', -1)
+    task_id = request.POST.get('taskId', -1)
+    try:
+        user = Profile.objects.get(session=session)
+        task = Task.objects.get(pk=task_id)
+        task.active = True
+        user.tasks.add(task)
+        task.possible_workers.clear()
+        task.start_date = datetime.datetime.today()
+        task.save()
+        user.save()
+        return JsonResponse(task.get_json())
     except Profile.DoesNotExist:
         return JsonResponse({"result": "Invalid Session!"}, status=401)
     except Task.DoesNotExist:

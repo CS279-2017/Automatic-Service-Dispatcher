@@ -51,37 +51,37 @@ public class LocationService extends Service {
 
             Log.i(TAG, "Location update recieved: " + location.getLatitude() + " " + location.getLongitude());
 
-//            // todo update web api
-//            Retrofit retrofit = new Retrofit.Builder()
-//                    .baseUrl("http://10.0.2.2:8000/") // todo
-//                    .addConverterFactory(GsonConverterFactory.create())
-//                    .build();
-//
-//            // prepare call in Retrofit 2.0
-//            GlowAPI glowAPI = retrofit.create(GlowAPI.class);
-//
-//            Call<Object> call = glowAPI.updateLocation(mSession,
-//                                                    location.getTime(),
-//                                                    location.getLatitude(),
-//                                                    location.getLongitude());
-//
-//
-//            //asynchronous call
-//            call.enqueue(new Callback<Object>() {
-//                @Override
-//                public void onResponse(Call<Object> call, Response<Object> response) {
-//                    if (response.isSuccessful()) {
-//                        Log.i(TAG, "Location update successful");
-//                    } else {
-//                        Log.i(TAG, "Location update unsuccessful");
-//                    }
-//                }
-//                @Override
-//                public void onFailure(Call<Object> call, Throwable t) {
-//                    Log.e(TAG, "Location update failure: " + t.getMessage());
-//                }
-//            });
-//
+            // todo update web api
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("http://10.0.2.2:8000/") // todo
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            // prepare call in Retrofit 2.0
+            GlowAPI glowAPI = retrofit.create(GlowAPI.class);
+
+            Call<Object> call = glowAPI.updateLocation(mSession,
+                                                    location.getTime(),
+                                                    location.getLatitude(),
+                                                    location.getLongitude());
+
+
+            //asynchronous call
+            call.enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(Call<Object> call, Response<Object> response) {
+                    if (response.isSuccessful()) {
+                        Log.i(TAG, "Location update successful");
+                    } else {
+                        Log.i(TAG, "Location update unsuccessful");
+                    }
+                }
+                @Override
+                public void onFailure(Call<Object> call, Throwable t) {
+                    Log.e(TAG, "Location update failure: " + t.getMessage());
+                }
+            });
+
         }
 
         @Override

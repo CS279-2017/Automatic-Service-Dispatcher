@@ -100,11 +100,11 @@ public class MainActivity extends ListActivity {
                         completeTask(sessionId, selectedItem.taskId);
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                    }
-                });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -213,11 +213,11 @@ public class MainActivity extends ListActivity {
             }
 
             TextView taskName = (TextView) convertView.findViewById(R.id.taskTitle);
-            TextView date = (TextView) convertView.findViewById(R.id.dateTitle);
+            //TextView date = (TextView) convertView.findViewById(R.id.dateTitle);
             TextView hours = (TextView) convertView.findViewById(R.id.time);
 
-            taskName.setText(task.name);
-            date.setText(getDateString(task.date));
+            taskName.setText(task.name+" at Pad "+task.sensor);
+            //date.setText(getDateString(task.date));
             hours.setText(getTime(task.date));
 
             return convertView;

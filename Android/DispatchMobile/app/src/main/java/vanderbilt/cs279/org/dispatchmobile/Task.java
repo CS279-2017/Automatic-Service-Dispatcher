@@ -13,6 +13,7 @@ public class Task {
     String date;
     long sensor;
     String dateCompleted;
+    String image;
 
     int hoursOpen;
 

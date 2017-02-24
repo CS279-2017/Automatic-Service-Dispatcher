@@ -97,7 +97,9 @@ public class NavDrawAct extends AppCompatActivity
             transaction.replace(R.id.content_nav_draw, new TestFrag2());
             transaction.commit();
         } else if (id == R.id.nav_slideshow) {
-
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.content_nav_draw, new TaskListFrag());
+            transaction.commit();
         } else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_share) {

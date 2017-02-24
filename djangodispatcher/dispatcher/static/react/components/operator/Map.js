@@ -14,12 +14,29 @@ var Map = React.createClass( {
     if(newProps.sensors!=undefined){
         for(var i=0;i<newProps.sensors.length;i++){
             var sensor = {lat: parseFloat(newProps.sensors[i].lat), lng: parseFloat(newProps.sensors[i].long)};
-            var marker = new google.maps.Marker({
-              position: sensor,
-              map: this.map,
-              icon: "https://maps.google.com/mapfiles/ms/micons/water.png"
-              //label: "S"+newProps.sensors[i].sensor,
-            });
+            var marker;
+            if(newProps.sensors[i].state=="clear"){
+                marker = new google.maps.Marker({
+                  position: sensor,
+                  map: this.map,
+                  icon: "https://maps.google.com/mapfiles/ms/micons/water.png"
+                  //label: "S"+newProps.sensors[i].sensor,
+                });
+            } else if(newProps.sensors[i].state="pending_task"){
+                marker = new google.maps.Marker({
+                  position: sensor,
+                  map: this.map,
+                  icon: "https://maps.google.com/mapfiles/ms/micons/hotsprings.png"
+                  //label: "S"+newProps.sensors[i].sensor,
+                });
+            } else {
+                marker = new google.maps.Marker({
+                  position: sensor,
+                  map: this.map,
+                  icon: "https://maps.google.com/mapfiles/ms/micons/mechanic.png"
+                  //label: "S"+newProps.sensors[i].sensor,
+                });
+            }
             var infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.sensors[i].sensor+"</p>" });
             this.bindInfoWindow(marker, this.map, infowindow)
             this.state.sensorMarkers.push(marker)
@@ -28,13 +45,24 @@ var Map = React.createClass( {
     if(newProps.users!=undefined){
         for(var i=0;i<newProps.users.length;i++){
             var sensor = {lat: parseFloat(newProps.users[i].lat), lng: parseFloat(newProps.users[i].long)};
-            var marker = new google.maps.Marker({
-              position: sensor,
-              map: this.map,
-              icon: "https://maps.google.com/mapfiles/ms/micons/truck.png"
-              //label: newProps.users[i].firstName,
-            });
-            var infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+"</p>" });
+            var marker;
+            var infowindow;
+            if(newProps.users[i].activeTask == null){
+                marker = new google.maps.Marker({
+                  position: sensor,
+                  map: this.map,
+                  icon: "https://maps.google.com/mapfiles/ms/micons/truck.png"
+                });
+                infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+" currently has no tasks</p></br><p>Their tank is full</p>" });
+            } else {
+                marker = new google.maps.Marker({
+                  position: sensor,
+                  map: this.map,
+                  icon: "http://maps.google.com/mapfiles/kml/pal4/icon15.png"
+                });
+                var myDate = new Date(newProps.users[i].activeTask.start_date);
+                infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+" started a new task at "+myDate+"</p></br><p>They are headed to Pad"+newProps.users[i].activeTask.sensor+"</p>" });
+            }
             this.bindInfoWindow(marker, this.map, infowindow)
             this.state.sensorMarkers.push(marker)
         }
@@ -53,7 +81,6 @@ var Map = React.createClass( {
   render: function() {
     const mapStyle = {
       width: '100%',
-      marginLeft: 20,
       height: 540,
       border: '1px solid black'
     };
