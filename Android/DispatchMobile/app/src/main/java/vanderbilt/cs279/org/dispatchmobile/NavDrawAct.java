@@ -1,9 +1,16 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,6 +25,68 @@ import vanderbilt.cs279.org.dispatchmobile.R;
 
 public class NavDrawAct extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static final String TAG = NavDrawAct.class.getCanonicalName();
+    private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION=1;
+
+    //////////////////////////////////////////////////////////////////////////////
+    // Location Service
+    private void setupLocationService(){
+
+        if(ContextCompat.checkSelfPermission(this,
+                                            Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+            }
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_PERMISSION_ACCESS_FINE_LOCATION);
+
+        } else {
+            // TODO: 2017-02-23  
+            //startLocationService();
+        }
+
+        //startLocationService();
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String permissions[],
+            int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSION_ACCESS_FINE_LOCATION:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    Log.i("login", "Permission Granted");
+                    //startLocationService(); // TODO: 2017-02-23
+                } else {
+                    Log.i("login", "Permission Denied");
+                }
+        }
+    }
+
+    private void startLocationService(){
+        Log.i("login", "Starting Service");
+
+        Intent locIntent = new Intent(this, LocationService.class);
+        locIntent.putExtra(LocationService.SESSION_STRING, "test_session");
+
+        startService(locIntent);
+    }
+
+    private void stopLocationService() {
+        Intent locIntent = new Intent(this, LocationService.class);
+        stopService(locIntent);
+    }
+    //
+    ////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +112,23 @@ public class NavDrawAct extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.content_nav_draw, new TestFragment());
-        transaction.commit();
+        changeActiveFragment(new MapViewFragment());
+
+        // TODO: 2017-02-23 activate for deployment
+        setupLocationService();
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        stopLocationService();
+        Log.i(TAG, "service stopped");
+    }
+
+    @Override
+    protected  void onResume(){
+        super.onResume();
+        // TODO: 2017-02-23 checkSession
     }
 
     @Override
@@ -88,14 +171,9 @@ public class NavDrawAct extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.content_nav_draw, new TestFragment());
-            transaction.commit();
+            changeActiveFragment(new MapViewFragment());
         } else if (id == R.id.nav_gallery) {
-
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.content_nav_draw, new TestFrag2());
-            transaction.commit();
+            changeActiveFragment(new TestFrag2());
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -109,5 +187,11 @@ public class NavDrawAct extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void changeActiveFragment(Fragment newFrag){
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.content_nav_draw, newFrag);
+        transaction.commit();
     }
 }

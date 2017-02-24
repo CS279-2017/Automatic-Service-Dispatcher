@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <uses-library android:name="com.google.android.maps" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -59,6 +61,8 @@
         </service>
 
         <activity android:name=".UserProfileActivity"></activity>
+
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyBpq_6irqJcaGkGizQaupWJRmVjH_EcpBs"/>
     </application>
 
 </manifest>

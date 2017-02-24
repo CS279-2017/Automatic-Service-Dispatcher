@@ -54,72 +54,10 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
     SharedPreferences mSharedPreferences;
     Retrofit retrofit;
     GlowAPI glowAPI;
-
-    /////////////////////////////////////////////////////////////////////
-    // todo geoff
-    private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION=1;
-
-    @Override
-    public void onRequestPermissionsResult(
-            int requestCode,
-            String permissions[],
-            int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_PERMISSION_ACCESS_FINE_LOCATION:
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    Log.i("login", "Permission Granted");
-                    startLocationService();
-                } else {
-                    Log.i("login", "Permission Denied");
-                }
-        }
-    }
-
-    private void startLocationService(){
-        Log.i("login", "Starting Service");
-
-        Intent locIntent = new Intent(this, LocationService.class);
-        locIntent.putExtra(LocationService.SESSION_STRING, "test_session");
-
-        startService(locIntent);
-    }
-
-    private void stopLocationService() {
-        Intent locIntent = new Intent(this, LocationService.class);
-        stopService(locIntent);
-    }
-
-    /////////////////////////////////////////////////////////////////////
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        /////////////////////////////////////////////////
-        // todo Geoff
-        // Location serice testing
-//
-//        if(ContextCompat.checkSelfPermission(this,
-//                                            Manifest.permission.ACCESS_FINE_LOCATION)
-//                != PackageManager.PERMISSION_GRANTED){
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-//                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-//
-//            }
-//
-//            ActivityCompat.requestPermissions(this,
-//                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-//                    REQUEST_PERMISSION_ACCESS_FINE_LOCATION);
-//
-//        } else {
-//            startLocationService();
-//        }
-//
-//        startLocationService();
-        /////////////////////////////////////////////////
-
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -157,17 +95,6 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
         checkSession();
     }
 
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        /////////////////////////////////////////////////
-        // todo Geoff
-        // Location serice testing
-//        stopLocationService();
-//        Log.i("login", "service stoped");
-        /////////////////////////////////////////////////
-    }
-
     /*
     Redirects to task view if authenticated
     */
@@ -176,6 +103,9 @@ public class LoginActivity extends AppCompatActivity{//} implements LoaderCallba
         finish();
         startActivity(myIntent);
     }
+
+    // TODO: 2017-02-23 should checkSession,
+    
     /*
     Checks shared preferences for session id. If set, then validate against server
      */
