@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-import uuid
+import hashlib
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -40,10 +40,14 @@ class Profile(models.Model):
     def __unicode__(self):
         return self.user.username
 
+    def email_hash(self):
+        return hashlib.md5(self.user.email.lower()).hexdigest()
+
     def current_task(self):
         task = self.tasks.filter(active=True)
+        print(task)
         if not task:
-            return {}
+            return None
         else:
             task = task[0]
             return task.get_json()
@@ -69,9 +73,9 @@ class Profile(models.Model):
         for j in Job.objects.all():
             all_jobs.append({"name": j.name, "title": j.title, "id": j.pk})
         return {'firstName': self.user.first_name, 'lastName': self.user.last_name, 'email': self.user.email,
-                'id': self.user.pk, 'profession': self.profession,
-                "numActive": Task.objects.filter(worker=self, active=True).count(),
-                "numDone": Task.objects.filter(worker=self, active=False).count(),
+                'id': self.user.pk, 'profession': self.profession, 'emailHash': self.email_hash(),
+                #"numActive": Task.objects.filter(worker=self, active=True).count(),
+                "numDone": self.tasks.filter(active=False).count(),
                 "sessionId": self.session, "skills": jobs, "possibleSkills": all_jobs}
 
 
@@ -80,11 +84,12 @@ class Task(models.Model):
     sensor = models.ForeignKey("Sensor", blank=True, null=True)
     job = models.ForeignKey(Job, blank=True, null=True)
     date = models.DateTimeField(default=timezone.now())
+    start_date = models.DateTimeField(null=True)
     datecompleted = models.DateTimeField(default=timezone.now())
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return self.job.title
+        return self.job.title+" "+self.sensor.sensorId
 
     '''def get_json(self):
         return {'taskId': self.pk, 'workerId': self.worker.pk, 'name': self.job.name, 'date': self.date,
@@ -93,13 +98,20 @@ class Task(models.Model):
     def get_json(self):
         hoursOpen = -1
         if not self.active:
-            time = (self.datecompleted-self.date)
+            time = (self.datecompleted-self.start_date)
             hoursOpen = time.days*24+time.seconds/3600
-        return {'taskId': self.pk, 'name': self.job.name, 'date': self.date,  # 'workerId': self.worker.pk,
+        return {'taskId': self.pk, 'name': self.job.name, 'date': self.date,  'start_date': self.start_date, # 'workerId': self.worker.pk,
                 "sensor": self.sensor.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen}
 
 class Sensor(models.Model):
     sensorId = models.CharField(max_length=50, default="0", unique=True)
     location = models.ForeignKey(Location)
 
+    def get_state(self):
+        if not self.task_set.filter(active=True):
+            return "clear"
+        elif self.task_set.filter(active=True, profile__isnull=True):
+            return "pending_task"
+        else:
+            return "being_fixed"
 

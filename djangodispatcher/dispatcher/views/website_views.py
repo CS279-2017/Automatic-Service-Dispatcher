@@ -3,7 +3,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, HttpResponseRedirect, HttpResponse
 from django.contrib.auth import logout, authenticate, login
 from pyfcm import FCMNotification
-
+import urllib
+import base64
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -13,6 +14,7 @@ from django.contrib.auth.models import User
 
 from django.utils import timezone
 import math, json, pytz, datetime
+from random import randint
 
 
 @login_required
@@ -126,41 +128,45 @@ def delegate(request):
 
 @csrf_exempt
 def create_sample_task(request):
-    API_KEY = 'AAAA7bChu4E:APA91bE9IriEYJr7n6PV7I-lcZ8k82F2nYgI-GqkYUeC09g_XCN1yZvQq3iaziQQXM7Jbh4kMYyixnlZCgCOEXcdIPSfwLG4S7NKXkAxy-oYaMPK5BeioJOMy1SkxBp5rR5B7NwbCu9G'
-    push_service = FCMNotification(api_key=API_KEY)
-    # Your api-key can be gotten from:  https://console.firebase.google.com/project/<project-name>/settings/cloudmessaging
-    # AIzaSyComw1k-ukcSZcYgGRbae2MjOyka1PA60w
-    profile = Profile.objects.get(user__username="mechanic")
-    registration_id = profile.device
-    # registration_id = "fL0Crhz4i58:APA91bHXi1c8RE1s2SJ_7wL6ibrz0vWgyF4w1IaU5ZKy8QCbfh7YPOQBd8vzkRaH70fElhUpnXdjT_H-ANdZCRpbciQM3_FsLH_ZFxdBxDSg60ocwXkR5LIr_3gpqrdHTJjkQ8JwdkNs"
-    print len(registration_id)
-    message_title = "Uber update"
-    message_body = "Hi john, your customized news for today is ready"
-    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body)
-    print result
+    # API_KEY = 'AAAA7bChu4E:APA91bE9IriEYJr7n6PV7I-lcZ8k82F2nYgI-GqkYUeC09g_XCN1yZvQq3iaziQQXM7Jbh4kMYyixnlZCgCOEXcdIPSfwLG4S7NKXkAxy-oYaMPK5BeioJOMy1SkxBp5rR5B7NwbCu9G'
+    # push_service = FCMNotification(api_key=API_KEY)
+    # # Your api-key can be gotten from:  https://console.firebase.google.com/project/<project-name>/settings/cloudmessaging
+    # # AIzaSyComw1k-ukcSZcYgGRbae2MjOyka1PA60w
+    # profile = Profile.objects.get(user__username="mechanic")
+    # registration_id = profile.device
+    # # registration_id = "fL0Crhz4i58:APA91bHXi1c8RE1s2SJ_7wL6ibrz0vWgyF4w1IaU5ZKy8QCbfh7YPOQBd8vzkRaH70fElhUpnXdjT_H-ANdZCRpbciQM3_FsLH_ZFxdBxDSg60ocwXkR5LIr_3gpqrdHTJjkQ8JwdkNs"
+    # print len(registration_id)
+    # message_title = "Uber update"
+    # message_body = "Hi john, your customized news for today is ready"
+    # result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body)
+    # print result
+    t1 = datetime.datetime.today()
+    result = urllib.urlopen("https://maps.googleapis.com/maps/api/staticmap?center=40.718217,-73.998284&zoom=12&size=100x100&maptype=roadmap&key=AIzaSyCIlABW-dOGWbwCJP6o-KwNzbJhx73H_7k").read()
+    print(datetime.datetime.today()-t1)
+    encoded_string = base64.b64encode(result)
+    print(encoded_string)
     return JsonResponse({})
 
 # operator APIs
-# todo: task vs no task
 @login_required
 def get_all_workers(request):
     userlist = []
     for user in Profile.objects.filter(admin=False):
-        tasklist = [user.current_task()]
+        task = user.current_task()
         userlist.append({'firstName': user.user.first_name, 'lastName': user.user.last_name, 'email': user.user.email,
-                         'id': user.user.pk, 'profession': user.profession, 'activeTasks': tasklist,
+                         'id': user.user.pk, 'profession': user.profession, 'activeTask': task,
                          "lat": user.current_location().lat, "long": user.current_location().longitude,
-                         "numActive": user.tasks.filter(active=True).count(),
+                         "numActive": user.tasks.filter(active=True).count(), 'emailHash': user.email_hash(),
                          "numDone": user.tasks.filter(active=False).count()})
     return JsonResponse({"users": userlist})
 
 
-# todo: good, problem, problem but help on the way
 @login_required
 def get_all_sensors(request):
     sensor_list = []
     for sensor in Sensor.objects.all():
-        sensor_list.append({"sensor": sensor.sensorId, "lat": sensor.location.lat, "long": sensor.location.longitude})
+        sensor_list.append({"sensor": sensor.sensorId, "lat": sensor.location.lat, "long": sensor.location.longitude,
+                            "state": sensor.get_state()})
     return JsonResponse({"sensors": sensor_list})
 
 
@@ -277,19 +283,61 @@ def initialize(request):
     p3.locations.add(loc7)
     p3.save()
 
-    t1 = Task.objects.create(sensor=s1, job=j1, date=datetime.datetime(2016, 11, 28, 14, 11, 56, tzinfo=pytz.utc),
-                             datecompleted=datetime.datetime(2016, 11, 28, 18, 5, 48, tzinfo=pytz.utc), active=False)
-    p1.tasks.add(t1)
-    t2 = Task.objects.create(sensor=s2, job=j2, date=datetime.datetime(2016, 11, 28, 16, 48, 40, tzinfo=pytz.utc),
-                             datecompleted=datetime.datetime(2016, 11, 28, 20, 7, 45, tzinfo=pytz.utc), active=False)
-    p2.tasks.add(t2)
-    t3 = Task.objects.create(sensor=s4, job=j2, date=datetime.datetime(2016, 12, 1, 20, 30, 40, tzinfo=pytz.utc),
-                             datecompleted=datetime.datetime(2016, 12, 1, 20, 30, 40, tzinfo=pytz.utc), active=True)
-    p1.tasks.add(t3)
-    Task.objects.create(sensor=s3, job=j4, date=datetime.datetime(2016, 12, 1, 18, 11, 40, tzinfo=pytz.utc),
-                        datecompleted=datetime.datetime(2016, 12, 1, 23, 46, 59, tzinfo=pytz.utc), active=False)
-    t4 = Task.objects.create(sensor=s4, job=j3, date=datetime.datetime(2016, 12, 2, 12, 11, 40, tzinfo=pytz.utc),
-                             datecompleted=datetime.datetime(2016, 12, 2, 12, 11, 40, tzinfo=pytz.utc), active=True)
-    p2.tasks.add(t4)
-
+    # create past tasks
+    for i in range(0, 30):
+        sensor = s4
+        job = j4
+        random = randint(1, 4)
+        if random == 1:
+            sensor = s1
+        elif random == 2:
+            sensor = s2
+        elif random == 3:
+            sensor = s3
+        random = randint(1, 4)
+        if random == 1:
+            job = j1
+        elif random == 2:
+            job = j2
+        elif random == 3:
+            job = j3
+        date = datetime.datetime(2017, randint(1, 2), randint(1, 23), randint(1, 20), randint(1, 55), randint(1,55), tzinfo=pytz.utc)
+        hours = randint(1, 15)
+        end_date = date+datetime.timedelta(hours=hours)
+        start_date = date+datetime.timedelta(hours=randint(1, hours))
+        t1 = Task.objects.create(sensor=sensor, job=job, date=date, start_date=start_date,
+                                 datecompleted=end_date, active=False)
+        if job == j1 or job == j2:
+            p1.tasks.add(t1)
+        else:
+            if randint(0, 1) == 0:
+                p2.tasks.add(t1)
+            else:
+                p3.tasks.add(t1)
+    # create possible tasks
+    for i in range(0, 30):
+        sensor = s4
+        job = j4
+        random = randint(1, 4)
+        if random == 1:
+            sensor = s1
+        elif random == 2:
+            sensor = s2
+        elif random == 3:
+            sensor = s3
+        random = randint(1, 4)
+        if random == 1:
+            job = j1
+        elif random == 2:
+            job = j2
+        elif random == 3:
+            job = j3
+        date = datetime.datetime(2017, randint(1, 2), 23, randint(1, 20), randint(1, 55), randint(1,55), tzinfo=pytz.utc)
+        t1 = Task.objects.create(sensor=sensor, job=job, date=date,
+                                 datecompleted=date+datetime.timedelta(hours=randint(1, 15)), active=True)
+        if job == j1 or job == j2:
+            t1.possible_workers.add(p1)
+        else:
+            t1.possible_workers.add(p2)
+            t1.possible_workers.add(p3)
     return JsonResponse({})

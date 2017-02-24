@@ -19,7 +19,7 @@ var SideBar2 = React.createClass({
     </div>
   </div>
 </nav>);
-    }
+}
 });
 
 export default SideBar2

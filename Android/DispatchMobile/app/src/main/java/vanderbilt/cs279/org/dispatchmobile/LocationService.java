@@ -81,7 +81,6 @@ public class LocationService extends Service {
                     Log.e(TAG, "Location update failure: " + t.getMessage());
                 }
             });
-//
         }
 
         @Override
