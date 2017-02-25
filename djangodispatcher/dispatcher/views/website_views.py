@@ -175,27 +175,31 @@ def get_totals_data(request):
     active = Task.objects.filter(active=True).count()
     done = Task.objects.filter(active=False).count()
     num_users = Profile.objects.filter(admin=False).count()
-    titles = []
-    sites = []
-    titles.append("Site")
-    for job in Job.objects.all().order_by("pk"):
-        titles.append(job.name)
-    titles.append("Total")
-
-    for site in Sensor.objects.all().order_by("sensorId"):
-        data = [site.sensorId]
-        for job in Job.objects.all().order_by("pk"):
-            data.append(Task.objects.filter(sensor=site, job=job).count())
-        data.append(Task.objects.filter(sensor=site).count())
-        sites.append(data)
-
-    data = ["All"]
-    for job in Job.objects.all().order_by("pk"):
-            data.append(Task.objects.filter(job=job).count())
-    data.append(Task.objects.all().count())
-    sites.append(data)
-    return JsonResponse({"numActive": active, "numDone": done, "numUsers": num_users, "sites":
-                        {"titles": titles, "data": sites}})
+    eventsPerPad = {"labels": [], "data": [], "series": []}
+    skills = Job.objects.all()
+    for skill in skills:
+        eventsPerPad["series"].append([skill.name])
+    for pad in Sensor.objects.all():
+        eventsPerPad["labels"].append("Pad "+pad.sensorId)
+        data = []
+        for skill in skills:
+            data.append(Task.objects.filter(sensor=pad, job=skill).count())
+        eventsPerPad["data"].append(data)
+    times = {"labels": [], "data": [], "series": []}
+    times["series"].append(["Average Times"])
+    for skill in Job.objects.all():
+        tasks = Task.objects.filter(active=False, job=skill)
+        sum = 0
+        count = tasks.count()
+        for task in tasks:
+            sum += (task.datecompleted-task.start_date).seconds
+        if count == 0:
+            times["data"].append(0)
+        else:
+            times["data"].append(sum/float(3600*count))
+        times["labels"].append(skill.name)
+    return JsonResponse({"numActive": active, "numDone": done, "numUsers": num_users, "eventsPerPad": eventsPerPad,
+                         "timeChart": times})
 
 
 def logout_view(request):

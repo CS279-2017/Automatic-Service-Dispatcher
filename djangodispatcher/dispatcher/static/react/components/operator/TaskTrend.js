@@ -1,11 +1,9 @@
 var TaskTrend = React.createClass ({
     render: function() {
-		return(<div className="panel panel-default text-center">
-				  <div className="panel-body">
-				  	<h3>{this.props.number}</h3>
-					<h3>{this.props.title}</h3>
-				  </div>
-				</div>)
+		return(<div className="quickstat-card">
+			<div className="quickstat-card-header">{this.props.title}</div>
+			<div className="quickstat-card-data text-center">{this.props.number}</div>
+		</div>)
     }
 });
 

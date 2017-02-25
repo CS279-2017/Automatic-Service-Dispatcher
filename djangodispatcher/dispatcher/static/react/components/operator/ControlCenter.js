@@ -19,7 +19,7 @@ var ControlCenter = React.createClass({
         var trends = [];
         if(this.props.allUsers!=undefined){
             for(var ii=0;ii<this.props.allUsers.length;ii++){
-                userlist.push(<div className="col-md-3 col-sm-4" key={ii}><UserPanel user = {this.props.allUsers[ii]}/></div>);
+                userlist.push(<div key={ii} className="col-md-2"><UserPanel user = {this.props.allUsers[ii]}/></div>);
             }
         }
         trends.push(<div className="col-md-4" key={1}><TaskTrend title="Total Users" number={this.props.numUsers}/></div>);
@@ -32,13 +32,13 @@ var ControlCenter = React.createClass({
                     <div role="tabpanel" className="tab-pane active text-center" id="map">
                     <Map sensors={this.props.sensors} users={this.props.allUsers}/>
                     </div>
-                    <div role="tabpanel" className="tab-pane" id="users"><br/><br/>{userlist}</div>
+                    <div role="tabpanel" className="tab-pane" id="users"><br/>{userlist}</div>
                     <div role="tabpanel" className="tab-pane" id="trends"><br/><br/>
                         <div className="col-md-12">
                         {trends}
                         </div>
                         <div className="col-md-12">
-                            <SiteTable sites={this.props.sites}/>
+                            <SiteTable eventsPerPad={this.props.eventsPerPad} timeChart={this.props.timeChart}/>
                         </div>
                     </div>
                   </div>
@@ -58,7 +58,10 @@ const mapStateToProps = (state) => {
         numActive:   state.operatorData.numActive,
         numDone:    state.operatorData.numDone,
         numUsers:   state.operatorData.numUsers,
-        sites:      state.operatorData.sites
+        //sites:      state.operatorData.sites
+
+        eventsPerPad: state.operatorData.eventsPerPad,
+        timeChart: state.operatorData.timeChart,
     };
 };
 

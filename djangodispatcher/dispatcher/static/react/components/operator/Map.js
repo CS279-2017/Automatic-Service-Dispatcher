@@ -37,7 +37,7 @@ var Map = React.createClass( {
                   //label: "S"+newProps.sensors[i].sensor,
                 });
             }
-            var infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.sensors[i].sensor+"</p>" });
+            var infowindow = new google.maps.InfoWindow({ content: "<p>Pad "+newProps.sensors[i].sensor+"</p>" });
             this.bindInfoWindow(marker, this.map, infowindow)
             this.state.sensorMarkers.push(marker)
         }
@@ -61,7 +61,7 @@ var Map = React.createClass( {
                   icon: "http://maps.google.com/mapfiles/kml/pal4/icon15.png"
                 });
                 var myDate = new Date(newProps.users[i].activeTask.start_date);
-                infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+" started a new task at "+myDate+"</p></br><p>They are headed to Pad"+newProps.users[i].activeTask.sensor+"</p>" });
+                infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+" started a new task at "+myDate+"</p></br><p>They are headed to Pad "+newProps.users[i].activeTask.sensor+"</p>" });
             }
             this.bindInfoWindow(marker, this.map, infowindow)
             this.state.sensorMarkers.push(marker)
