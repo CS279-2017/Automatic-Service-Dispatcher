@@ -198,6 +198,19 @@ public class NavDrawAct extends AppCompatActivity
         } else if (id == R.id.nav_settings) {
             Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
             toast.show();
+
+            MapViewFragment mapDirTest = new MapViewFragment();
+
+            Bundle args = new Bundle();
+            args.putDouble(MapViewFragment.LAT_DEST_KEY, 36.203177);
+            args.putDouble(MapViewFragment.LONG_DEST_KEY, -86.738602);
+
+            mapDirTest.setArguments(args);
+
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.content_nav_draw, mapDirTest);
+            transaction.commit();
+
         } else if (id == R.id.nav_logout) {
             String sessionId = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE).getString(mSessionId, "N/A");
             logout(sessionId);

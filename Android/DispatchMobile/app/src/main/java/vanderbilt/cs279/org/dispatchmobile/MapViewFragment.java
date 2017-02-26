@@ -1,5 +1,6 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,7 +10,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.akexorcist.googledirection.DirectionCallback;
+import com.akexorcist.googledirection.GoogleDirection;
+import com.akexorcist.googledirection.constant.TransportMode;
+import com.akexorcist.googledirection.model.Direction;
+import com.akexorcist.googledirection.util.DirectionConverter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -25,6 +32,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.ArrayList;
 //package vanderbilt.cs279.org.dispatchmobile;
 //
 //import android.os.Bundle;
@@ -49,7 +58,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
  */
 
 public class MapViewFragment extends Fragment
-    implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+    implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        LocationListener, DirectionCallback {
 
 
     GoogleApiClient mGoogleApiClient;
@@ -58,18 +68,36 @@ public class MapViewFragment extends Fragment
 
     Marker currLocMarker;
 
+    private String serverKey = "AIzaSyDEzbQHvv2frw-KIiiS7yCIOro7-NM9vTI";
 
     private static final String TAG = vanderbilt.cs279.org.dispatchmobile.MapViewFragment.class.getCanonicalName();
+    public static final String LAT_DEST_KEY = "lat";
+    public static final String LONG_DEST_KEY = "long";
 
     MapView mMapView;
     private GoogleMap googleMap;
 
+    LatLng mDestination = null;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.map_fragment_view, container, false);
+
+        Bundle args = getArguments();
+
+        if (args != null && args.containsKey(LAT_DEST_KEY) && args.containsKey(LONG_DEST_KEY)){
+
+            Log.i(TAG, "getting dirctions");
+            mDestination = new LatLng((double)args.get(LAT_DEST_KEY),
+                                    (double)args.get(LONG_DEST_KEY));
+
+        }
 
         mMapView = (MapView) rootView.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
+
+
 
         mMapView.onResume(); // needed to get the map to display immediately
 
@@ -98,6 +126,8 @@ public class MapViewFragment extends Fragment
         buildGoogleApiClient();
 
         mGoogleApiClient.connect();
+
+
 
         // For dropping a marker at a point on the Map
 //                LatLng sydney = new LatLng(-34, 151);
@@ -159,6 +189,18 @@ public class MapViewFragment extends Fragment
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,11));
             }
 
+            if(mDestination != null){
+
+                Log.i(TAG, "directions: connected");
+
+                GoogleDirection.withServerKey(serverKey)
+                        .from(currLocMarker.getPosition())
+                        .to(mDestination)
+                        .transportMode(TransportMode.DRIVING)
+                        .execute(this);
+
+            }
+
             // TODO: 2017-02-23 check that this is how often to update
             mLocationRequest = new LocationRequest();
             mLocationRequest.setInterval(5000); //5 seconds
@@ -200,15 +242,48 @@ public class MapViewFragment extends Fragment
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         currLocMarker = googleMap.addMarker(markerOptions);
 
+        if(mDestination != null){
+            GoogleDirection.withServerKey(serverKey)
+                    .from(currLocMarker.getPosition())
+                    .to(mDestination)
+                    .transportMode(TransportMode.DRIVING)
+                    .execute(this);
+
+        }
+
         Log.i(TAG, "Updating location");
 
 //        Toast.makeText(this,"Location Changed",Toast.LENGTH_SHORT).show();
 
         //zoom to current position:
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,11));
+        //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,11));
 
         //If you only need one location, unregister the listener
         //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
 
+    }
+
+    @Override
+    public void onDirectionSuccess(Direction direction, String rawBody) {
+
+        Log.i(TAG, "directions: success");
+
+        Log.i(TAG, "directions: status: "+ direction.getStatus() );
+
+        if (direction.isOK()) {
+            Log.i(TAG, "directions: is Okay");
+
+            //googleMap.addMarker(new MarkerOptions().position(currLocMarker.getPosition()));
+            googleMap.addMarker(new MarkerOptions().position(mDestination));
+
+            ArrayList<LatLng> directionPositionList = direction.getRouteList().get(0).getLegList().get(0).getDirectionPoint();
+            googleMap.addPolyline(DirectionConverter.createPolyline(getContext(), directionPositionList, 5, Color.RED));
+        }
+    }
+
+    @Override
+    public void onDirectionFailure(Throwable t) {
+        Toast toast = Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG);
+        toast.show();
     }
 }
