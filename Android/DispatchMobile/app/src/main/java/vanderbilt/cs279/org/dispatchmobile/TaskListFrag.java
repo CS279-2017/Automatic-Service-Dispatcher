@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
@@ -184,14 +185,27 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
         startActivity(myIntent);
     }
 
-    private void startTask(String session, long taskId){
-        Call<Task> call = glowAPI.startTask(session, taskId);
+    private void startTask(String session, final Task task){
+        Call<Task> call = glowAPI.startTask(session, task.taskId);
         call.enqueue(new Callback<Task>() {
             @Override
             public void onResponse(Call<Task> call, Response<Task> response) {
                 if (response.isSuccessful()) {
                     //TODO: plug into array adapter
                     Toast.makeText(getActivity(), "Task Started", Toast.LENGTH_SHORT).show();
+
+                    MapViewFragment mapDirTest = new MapViewFragment();
+
+                    Bundle args = new Bundle();
+                    args.putDouble(MapViewFragment.LAT_DEST_KEY, task.latitude);
+                    args.putDouble(MapViewFragment.LONG_DEST_KEY, task.longitude);
+
+                    mapDirTest.setArguments(args);
+
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.content_nav_draw, mapDirTest);
+                    transaction.commit();
+
                 } else {
                     // No Session
                     openLoginView();
@@ -233,7 +247,7 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
                             .setPositiveButton("Start Task", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
-                                    startTask(sessionId, task.taskId);
+                                    startTask(sessionId, task);
                                 }
                             });
                     builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
