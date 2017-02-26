@@ -231,7 +231,7 @@ public class MapViewFragment extends Fragment
     @Override
     public void onLocationChanged(Location location) {
         //place marker at current position
-        //googleMap.clear();
+        googleMap.clear();
         if (currLocMarker != null) {
             currLocMarker.remove();
         }
@@ -278,6 +278,8 @@ public class MapViewFragment extends Fragment
 
             ArrayList<LatLng> directionPositionList = direction.getRouteList().get(0).getLegList().get(0).getDirectionPoint();
             googleMap.addPolyline(DirectionConverter.createPolyline(getContext(), directionPositionList, 5, Color.RED));
+
+
         }
     }
 
