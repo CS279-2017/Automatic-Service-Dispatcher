@@ -97,6 +97,7 @@ class Task(models.Model):
 
     def get_json(self):
         hoursOpen = -1
+        minutes = -1
         if not self.active:
             time = (self.datecompleted-self.start_date)
             hoursOpen = time.days*24+time.seconds/3600

@@ -193,10 +193,12 @@ public class NavDrawAct extends AppCompatActivity
         } else if (id == R.id.nav_get_list) {
             changeActiveFragment(new TaskListFrag());
         } else if (id == R.id.nav_past_jobs) {
+            changeActiveFragment(new CompletedTaskListFrag());
             Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
             toast.show();
         } else if (id == R.id.nav_settings) {
-            Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
+            changeActiveFragment(new SettingsFragment());
+            /*Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
             toast.show();
 
             MapViewFragment mapDirTest = new MapViewFragment();
@@ -209,7 +211,7 @@ public class NavDrawAct extends AppCompatActivity
 
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.content_nav_draw, mapDirTest);
-            transaction.commit();
+            transaction.commit();*/
 
         } else if (id == R.id.nav_logout) {
             String sessionId = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE).getString(mSessionId, "N/A");
