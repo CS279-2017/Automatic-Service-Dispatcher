@@ -4,33 +4,25 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:id="@+id/nav_map"
+            android:title="Map" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:id="@+id/nav_get_list"
+            android:title="Possible Jobs" />
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Possible Tasks" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Past Tasks" />
+            android:id="@+id/nav_past_jobs"
+            android:title="Job History" />
+
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="Settings">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:id="@+id/nav_settings"
+                android:title="App Settings" />
             <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Settings" />
+                android:id="@+id/nav_logout"
+                android:title="Logout" />
         </menu>
     </item>
 

@@ -1,7 +1,9 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -9,6 +11,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +23,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import vanderbilt.cs279.org.dispatchmobile.R;
 
 public class NavDrawAct extends AppCompatActivity
@@ -28,6 +38,10 @@ public class NavDrawAct extends AppCompatActivity
 
     public static final String TAG = NavDrawAct.class.getCanonicalName();
     private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION=1;
+
+    private static final String mPREFERENCES = "GlowPrefs";
+    private static final String mSessionId = "sessionKey";
+    private static final String mDeviceId = "deviceId";
 
     //////////////////////////////////////////////////////////////////////////////
     // Location Service
@@ -93,7 +107,7 @@ public class NavDrawAct extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nav_draw);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar);
 
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
@@ -157,6 +171,10 @@ public class NavDrawAct extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
+            Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
+            toast.show();
+
             return true;
         }
 
@@ -169,21 +187,20 @@ public class NavDrawAct extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_map) {
             // Handle the camera action
             changeActiveFragment(new MapViewFragment());
-        } else if (id == R.id.nav_gallery) {
-            changeActiveFragment(new TestFrag2());
-        } else if (id == R.id.nav_slideshow) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.content_nav_draw, new TaskListFrag());
-            transaction.commit();
-        } else if (id == R.id.nav_manage) {
-            changeActiveFragment(new CompletedTaskListFrag());
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-            changeActiveFragment(new SettingsFragment());
+        } else if (id == R.id.nav_get_list) {
+            changeActiveFragment(new TaskListFrag());
+        } else if (id == R.id.nav_past_jobs) {
+            Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
+            toast.show();
+        } else if (id == R.id.nav_settings) {
+            Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
+            toast.show();
+        } else if (id == R.id.nav_logout) {
+            String sessionId = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE).getString(mSessionId, "N/A");
+            logout(sessionId);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -195,5 +212,42 @@ public class NavDrawAct extends AppCompatActivity
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.content_nav_draw, newFrag);
         transaction.commit();
+    }
+
+    private void logout(String session){
+        //https://futurestud.io/tutorials/how-to-run-an-android-app-against-a-localhost-api
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:8000/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        GlowAPI glow = retrofit.create(GlowAPI.class);
+
+        Call<Object> call = glow.logout(session);
+        call.enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(Call<Object> call, Response<Object> response) {
+                if (response.isSuccessful()) {
+                    SharedPreferences.Editor editor = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE).edit();
+                    editor.putString(mSessionId, "N/A");
+                    editor.apply();
+                    openLoginView();
+                } else {
+                    //nothing happens at failure
+                }
+            }
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+                // something went completely south (like no internet connection)
+                Log.e("Error", t.getMessage());
+            }
+        });
+    }
+
+    private void openLoginView(){
+        Intent myIntent = new Intent(this, LoginActivity.class);
+        myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(myIntent);
     }
 }

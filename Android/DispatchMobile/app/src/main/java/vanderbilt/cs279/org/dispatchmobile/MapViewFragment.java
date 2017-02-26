@@ -188,8 +188,8 @@ public class MapViewFragment extends Fragment
 
     @Override
     public void onLocationChanged(Location location) {
-//place marker at current position
-        //mGoogleMap.clear();
+        //place marker at current position
+        //googleMap.clear();
         if (currLocMarker != null) {
             currLocMarker.remove();
         }
@@ -200,10 +200,12 @@ public class MapViewFragment extends Fragment
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         currLocMarker = googleMap.addMarker(markerOptions);
 
+        Log.i(TAG, "Updating location");
+
 //        Toast.makeText(this,"Location Changed",Toast.LENGTH_SHORT).show();
 
         //zoom to current position:
-        //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,11));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,11));
 
         //If you only need one location, unregister the listener
         //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
