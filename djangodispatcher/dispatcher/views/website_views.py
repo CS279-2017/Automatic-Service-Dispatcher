@@ -230,13 +230,14 @@ def login_view(request):
 
 def initialize(request):
     # run python manage.py flush from the command line before executing this
-    loc1 = Location.objects.create(lat=36.3, longitude=-86.5)
-    loc2 = Location.objects.create(lat=36.1, longitude=-87)
-    loc3 = Location.objects.create(lat=36.3, longitude=-86.9)
-    loc4 = Location.objects.create(lat=35.9, longitude=-86.7)
-    loc5 = Location.objects.create(lat=36.16270, longitude=-86.78160)  # electrician
-    loc6 = Location.objects.create(lat=36, longitude=-86.75)  # mechanic
-    loc7 = Location.objects.create(lat=36.3, longitude=-86.75)  # other mechanic
+    # 37.4419
+    loc1 = Location.objects.create(lat=37.44, longitude=122.14) #lat=36.3, longitude=-86.5)
+    loc2 = Location.objects.create(lat=37.6, longitude=122)#lat=36.1, longitude=-87)
+    loc3 = Location.objects.create(lat=37, longitude=122.14)# lat=36.3, longitude=-86.9)
+    loc4 = Location.objects.create(lat=37.8, longitude=122.5)  #lat=35.9, longitude=-86.7)
+    loc5 = Location.objects.create(lat=37.7, longitude=121.6)  # lat=36.16270, longitude=-86.78160)  # electrician
+    loc6 = Location.objects.create(lat=37.6, longitude=121.5)  # lat=36, longitude=-86.75)  # mechanic
+    loc7 = Location.objects.create(lat=38, longitude=122)  # lat=36.3, longitude=-86.75)  # other mechanic
 
     j1 = Job.objects.create(title="LOW_VOLTAGE", name="Low Voltage")
     j2 = Job.objects.create(title="HIGH_VOLTAGE", name="High Voltage")

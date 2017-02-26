@@ -104,7 +104,8 @@ class Task(models.Model):
             minutes = time.seconds % 3600
             minutes /= 60
         return {'taskId': self.pk, 'name': self.job.name, 'date': self.date,  'start_date': self.start_date, # 'workerId': self.worker.pk,
-                "sensor": self.sensor.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen, "minutesOpen": minutes}
+                "sensor": self.sensor.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen, "minutesOpen": minutes,
+                "lattitude": self.sensor.location.lat, "longitude": self.sensor.location.longitude}
 
 class Sensor(models.Model):
     sensorId = models.CharField(max_length=50, default="0", unique=True)
