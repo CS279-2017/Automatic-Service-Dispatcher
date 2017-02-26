@@ -197,14 +197,19 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
                     MapViewFragment mapDirTest = new MapViewFragment();
 
                     Bundle args = new Bundle();
-                    args.putDouble(MapViewFragment.LAT_DEST_KEY, task.latitude);
-                    args.putDouble(MapViewFragment.LONG_DEST_KEY, task.longitude);
+
+                    Toast.makeText(getActivity(), "Lat: " + task.lattitude + " Long: " + task.longitude, Toast.LENGTH_SHORT).show();
+
+                    args.putDouble(MapViewFragment.LAT_DEST_KEY, (double)task.lattitude);
+                    args.putDouble(MapViewFragment.LONG_DEST_KEY, (double)task.longitude);
 
                     mapDirTest.setArguments(args);
 
                     FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.content_nav_draw, mapDirTest);
                     transaction.commit();
+
+                    Toast.makeText(getActivity(), "frag updated", Toast.LENGTH_SHORT).show();
 
                 } else {
                     // No Session

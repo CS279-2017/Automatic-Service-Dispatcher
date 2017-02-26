@@ -14,8 +14,8 @@ public class Task {
     long sensor;
     String dateCompleted;
     String image;
-    long latitude;
-    long longitude;
+    double lattitude;
+    double longitude;
 
     int hoursOpen;
     int minutesOpen;
