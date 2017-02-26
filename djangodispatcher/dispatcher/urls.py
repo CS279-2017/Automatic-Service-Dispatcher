@@ -23,6 +23,7 @@ urlpatterns = [
 
     # android
     url(r'^api/android/possible_tasks', android_views.get_possible_tasks, name='possible_tasks_android'), #todo change in android
+    url(r'^api/android/previous_tasks', android_views.get_previous_tasks, name='previous_tasks_android'), #todo change in android
     url(r'^api/android/my_task', android_views.get_my_task, name='my_task_android'), #todo change in android
     url(r'^api/android/update_location', android_views.update_location, name='android_location_updater'),
     url(r'^api/android/start_task', android_views.start_task, name='android_start_task'),

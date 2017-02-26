@@ -307,8 +307,8 @@ def initialize(request):
             job = j3
         date = datetime.datetime(2017, randint(1, 2), randint(1, 23), randint(1, 20), randint(1, 55), randint(1,55), tzinfo=pytz.utc)
         hours = randint(1, 15)
-        end_date = date+datetime.timedelta(hours=hours)
-        start_date = date+datetime.timedelta(hours=randint(1, hours))
+        end_date = date+datetime.timedelta(hours=randint(1, hours))+datetime.timedelta(minutes=randint(0,55))
+        start_date = date+datetime.timedelta(hours=hours)
         t1 = Task.objects.create(sensor=sensor, job=job, date=date, start_date=start_date,
                                  datecompleted=end_date, active=False)
         if job == j1 or job == j2:

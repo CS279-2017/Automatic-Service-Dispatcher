@@ -60,7 +60,7 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".UserProfileActivity"></activity>
+        <!--<activity android:name=".UserProfileActivity"></activity>-->
 
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyBpq_6irqJcaGkGizQaupWJRmVjH_EcpBs"/>
     </application>

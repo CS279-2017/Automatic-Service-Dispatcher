@@ -100,8 +100,10 @@ class Task(models.Model):
         if not self.active:
             time = (self.datecompleted-self.start_date)
             hoursOpen = time.days*24+time.seconds/3600
+            minutes = time.seconds % 3600
+            minutes /= 60
         return {'taskId': self.pk, 'name': self.job.name, 'date': self.date,  'start_date': self.start_date, # 'workerId': self.worker.pk,
-                "sensor": self.sensor.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen}
+                "sensor": self.sensor.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen, "minutesOpen": minutes}
 
 class Sensor(models.Model):
     sensorId = models.CharField(max_length=50, default="0", unique=True)

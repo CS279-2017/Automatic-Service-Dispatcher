@@ -120,7 +120,7 @@ public class MainActivity extends ListActivity {
     }
 
     private void getTasks(String session, String deviceId){
-        Call<TaskList> call = glowAPI.loadActiveTasks(session, deviceId);
+        Call<TaskList> call = glowAPI.loadPossibleTasks(session, deviceId);
         call.enqueue(new Callback<TaskList>() {
             @Override
             public void onResponse(Call<TaskList> call, Response<TaskList> response) {
@@ -193,8 +193,8 @@ public class MainActivity extends ListActivity {
     }
 
     private void openSettings(){
-        Intent myIntent = new Intent(this, UserProfileActivity.class);
-        startActivity(myIntent);
+        //Intent myIntent = new Intent(this, UserProfileActivity.class);
+        //startActivity(myIntent);
     }
 
     public class TasksAdapter extends ArrayAdapter<Task> {

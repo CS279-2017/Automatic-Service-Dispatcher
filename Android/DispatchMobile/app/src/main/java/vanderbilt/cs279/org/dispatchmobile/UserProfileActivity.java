@@ -1,4 +1,4 @@
-package vanderbilt.cs279.org.dispatchmobile;
+/*package vanderbilt.cs279.org.dispatchmobile;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,7 +16,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,7 +46,7 @@ public class UserProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_profile);
+        setContentView(R.layout.fragment_user_profile);
         mFirstName = (EditText) findViewById(R.id.firstNameEdit);
         mFirstName.addTextChangedListener(new TextWatcher() {
             @Override
@@ -238,3 +237,4 @@ public class UserProfileActivity extends AppCompatActivity {
         dialog.show();
     }
 }
+*/

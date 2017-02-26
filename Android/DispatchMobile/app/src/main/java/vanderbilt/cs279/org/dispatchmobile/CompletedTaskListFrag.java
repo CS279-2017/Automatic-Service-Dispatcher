@@ -1,5 +1,9 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
+/**
+ * Created by Sam on 2/26/2017.
+ */
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -37,8 +41,6 @@ import android.widget.Toast;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,7 +52,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by gpettet on 2017-02-23.
  */
 
-public class TaskListFrag extends ListFragment implements AdapterView.OnItemClickListener {
+public class CompletedTaskListFrag extends ListFragment implements AdapterView.OnItemClickListener {
     //private TasksAdapter mAdapter;
     private TasksAdapter mAdapter;
     private ProgressBar mProgressView;
@@ -106,36 +108,6 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
         //Toast.makeText(getActivity(), "Item: " + position, Toast.LENGTH_SHORT).show();
-        final Task selectedItem = (Task) getListView().getItemAtPosition(position);
-        String message = selectedItem.name+" at sensor "+selectedItem.sensor;
-
-        TextView textView = (TextView) view.findViewById(R.id.additionalData);
-        textView.setVisibility(textView.getVisibility()==View.VISIBLE ? View.GONE : View.VISIBLE);
-        /*if ( textView.getVisibility() == View.GONE) {
-            //expandedChildList.set(arg2, true);
-            textView.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            //expandedChildList.set(arg2, false);
-            textView.setVisibility(View.GONE);
-        }*/
-        //TODO: finish task
-        /*AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());//getActivity());
-        builder.setMessage(message).setTitle("Complete Task")
-                .setPositiveButton("Complete", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        //String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
-                        //completeTask(sessionId, selectedItem.taskId);
-                    }
-                });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User cancelled the dialog
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();*/
     }
 
     private void getTasks(){
@@ -152,7 +124,7 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
     }
 
     private void getTasks(String session, String deviceId){
-        Call<TaskList> call = glowAPI.loadPossibleTasks(session, deviceId);
+        Call<TaskList> call = glowAPI.loadPreviousTasks(session, deviceId);
         call.enqueue(new Callback<TaskList>() {
             @Override
             public void onResponse(Call<TaskList> call, Response<TaskList> response) {
@@ -217,42 +189,14 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
             final Task task = getItem(position);
             // Check if an existing view is being reused, otherwise inflate the view
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.task_row, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.previous_task_row, parent, false);
             }
 
-            TextView taskName = (TextView) convertView.findViewById(R.id.taskTitle);
-            TextView hours = (TextView) convertView.findViewById(R.id.time);
-            Button additionalData = (Button) convertView.findViewById(R.id.additionalData);
-            additionalData.setVisibility(View.GONE);
-            additionalData.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    String message = task.name+" at sensor "+task.sensor;
-                    //TODO: finish task
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());//getActivity());
-                    builder.setMessage(message).setTitle(task.name)
-                            .setPositiveButton("Start Task", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
-                                    startTask(sessionId, task.taskId);
-                                }
-                            });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            // User cancelled the dialog
-                        }
-                    });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
-            });
-
-            ImageView image = (ImageView) convertView.findViewById(R.id.locationImage);
-            byte[] decodedString = Base64.decode(task.image, Base64.DEFAULT);
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            image.setImageBitmap(decodedByte);
+            TextView taskName = (TextView) convertView.findViewById(R.id.previousTaskTitle);
+            TextView hours = (TextView) convertView.findViewById(R.id.previousTime);
 
             taskName.setText(task.name+" at Pad "+task.sensor);
-            hours.setText(getTime(task.date));
+            hours.setText(task.hoursOpen+" hr "+task.minutesOpen+" min");
 
             return convertView;
 

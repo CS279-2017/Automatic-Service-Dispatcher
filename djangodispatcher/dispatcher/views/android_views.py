@@ -22,7 +22,6 @@ def get_my_task(request):
     except Profile.DoesNotExist:
         return JsonResponse({"result": "bad"}, status=401)
 
-# TODO change name
 @csrf_exempt
 def get_possible_tasks(request):
     session = request.POST.get('session', -1)
@@ -45,6 +44,23 @@ def get_possible_tasks(request):
                 encoded_string = base64.b64encode(result)
                 images[location] = encoded_string
                 intermediate["image"] = encoded_string
+            mytask.append(intermediate)
+        return JsonResponse({'active_tasks': mytask})
+    except Profile.DoesNotExist:
+        return JsonResponse({"result": "bad"}, status=401)
+
+
+@csrf_exempt
+def get_previous_tasks(request):
+    session = request.POST.get('session', -1)
+    deviceId = request.POST['deviceId']
+    try:
+        user = Profile.objects.get(session=session)
+        user.device = deviceId
+        user.save()
+        mytask = []
+        for task in user.tasks.filter(active=False).order_by("-date"):
+            intermediate = task.get_json()
             mytask.append(intermediate)
         return JsonResponse({'active_tasks': mytask})
     except Profile.DoesNotExist:

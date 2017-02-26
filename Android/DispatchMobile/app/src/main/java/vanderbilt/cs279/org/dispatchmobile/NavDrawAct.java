@@ -179,11 +179,11 @@ public class NavDrawAct extends AppCompatActivity
             transaction.replace(R.id.content_nav_draw, new TaskListFrag());
             transaction.commit();
         } else if (id == R.id.nav_manage) {
-
+            changeActiveFragment(new CompletedTaskListFrag());
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
-
+            changeActiveFragment(new SettingsFragment());
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -16,6 +16,7 @@ public class Task {
     String image;
 
     int hoursOpen;
+    int minutesOpen;
 
     @Override
     public String toString() {
