@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
     <TextView
+        android:paddingLeft="@dimen/activity_horizontal_margin"
         android:id="@+id/taskTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -12,6 +13,7 @@
         android:textStyle="bold"
         android:text="Task" />
     <TextView
+        android:paddingLeft="@dimen/activity_horizontal_margin"
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

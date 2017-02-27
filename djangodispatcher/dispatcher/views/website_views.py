@@ -231,13 +231,13 @@ def login_view(request):
 def initialize(request):
     # run python manage.py flush from the command line before executing this
     # 37.4419
-    loc1 = Location.objects.create(lat=37.44, longitude=122.14) #lat=36.3, longitude=-86.5)
-    loc2 = Location.objects.create(lat=37.6, longitude=122)#lat=36.1, longitude=-87)
-    loc3 = Location.objects.create(lat=37, longitude=122.14)# lat=36.3, longitude=-86.9)
-    loc4 = Location.objects.create(lat=37.8, longitude=122.5)  #lat=35.9, longitude=-86.7)
-    loc5 = Location.objects.create(lat=37.7, longitude=121.6)  # lat=36.16270, longitude=-86.78160)  # electrician
-    loc6 = Location.objects.create(lat=37.6, longitude=121.5)  # lat=36, longitude=-86.75)  # mechanic
-    loc7 = Location.objects.create(lat=38, longitude=122)  # lat=36.3, longitude=-86.75)  # other mechanic
+    loc1 = Location.objects.create(lat=37.455659, longitude=-122.194612) #lat=36.3, longitude=-86.5)
+    loc2 = Location.objects.create(lat=37.6, longitude=-122)#lat=36.1, longitude=-87)
+    loc3 = Location.objects.create(lat=37, longitude=-122.14)# lat=36.3, longitude=-86.9)
+    loc4 = Location.objects.create(lat=37.8, longitude=-122.5)  #lat=35.9, longitude=-86.7)
+    loc5 = Location.objects.create(lat=37.7, longitude=-121.6)  # lat=36.16270, longitude=-86.78160)  # electrician
+    loc6 = Location.objects.create(lat=37.6, longitude=-121.5)  # lat=36, longitude=-86.75)  # mechanic
+    loc7 = Location.objects.create(lat=38, longitude=-122)  # lat=36.3, longitude=-86.75)  # other mechanic
 
     j1 = Job.objects.create(title="LOW_VOLTAGE", name="Low Voltage")
     j2 = Job.objects.create(title="HIGH_VOLTAGE", name="High Voltage")
@@ -308,7 +308,7 @@ def initialize(request):
             job = j3
         date = datetime.datetime(2017, randint(1, 2), randint(1, 23), randint(1, 20), randint(1, 55), randint(1,55), tzinfo=pytz.utc)
         hours = randint(1, 15)
-        end_date = date+datetime.timedelta(hours=randint(1, hours))+datetime.timedelta(minutes=randint(0,55))
+        end_date = date+datetime.timedelta(hours=randint(hours+1, hours+10))+datetime.timedelta(minutes=randint(0,55))
         start_date = date+datetime.timedelta(hours=hours)
         t1 = Task.objects.create(sensor=sensor, job=job, date=date, start_date=start_date,
                                  datecompleted=end_date, active=False)
