@@ -9,3 +9,5 @@
 /Analysis/gradlew
 /Analysis/gradlew.bat
 /Analysis/settings.gradle
+
+/djangodispatcher/db.sqlite3
