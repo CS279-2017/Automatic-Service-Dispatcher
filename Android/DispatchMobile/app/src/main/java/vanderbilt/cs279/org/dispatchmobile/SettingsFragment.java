@@ -3,15 +3,21 @@ package vanderbilt.cs279.org.dispatchmobile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.InputStream;
 import java.util.Set;
 
 import retrofit2.Call;
@@ -30,6 +36,7 @@ public class SettingsFragment extends Fragment {
     private TextView mEmail;
     private TextView mProfession;
     private TextView mSkills;
+    private ImageView mProfileImage;
 
     private static final String mPREFERENCES = "GlowPrefs";
     private static final String mSessionId = "sessionKey";
@@ -58,6 +65,7 @@ public class SettingsFragment extends Fragment {
         mEmail = (TextView) view.findViewById(R.id.emailText);
         mProfession = (TextView) view.findViewById(R.id.professionText);
         mSkills = (TextView) view.findViewById(R.id.skillsText);
+        mProfileImage = (ImageView)view.findViewById(R.id.profileImage);
 
         mSharedPreferences = this.getActivity().getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
         retrofit = new Retrofit.Builder()
@@ -89,6 +97,7 @@ public class SettingsFragment extends Fragment {
                     mLastName.setText(mUser.lastName);
                     mEmail.setText(mUser.email);
                     mProfession.setText(mUser.profession);
+                    new DownloadImageTask(mProfileImage).execute("https://www.gravatar.com/avatar/"+mUser.emailHash+"?d=identicon&s=600");
                 } else {
                     openLoginView();
                 }
@@ -114,4 +123,29 @@ public class SettingsFragment extends Fragment {
         Toast.makeText(this.getActivity(), message, Toast.LENGTH_LONG).show();
     }
 
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
+    }
 }

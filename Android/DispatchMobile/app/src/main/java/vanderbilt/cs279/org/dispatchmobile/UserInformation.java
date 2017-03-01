@@ -21,6 +21,8 @@ public class UserInformation {
     List<Skill> skills;
     List<Skill> possibleSkills;
 
+    String emailHash;
+
     @Override
     public String toString() {
         return(firstName+" "+lastName+" "+sessionId);
