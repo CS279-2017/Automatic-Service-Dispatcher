@@ -3,9 +3,10 @@ var Map = React.createClass( {
        return {sensorMarkers: []}
     },
   componentDidMount: function() {
-    var nashville = {lat: 36.1627, lng: -86.7816};
+    //var nashville = {lat: 36.1627, lng: -86.7816};
+    var nashville = {lat: 37.384448, lng: -122.097244};
     this.map = new google.maps.Map(this.refs.map, {
-      zoom: 10,
+      zoom: 9,
       center: nashville
     });
   },

@@ -163,9 +163,9 @@ body,html{
     .forAnimate{
       opacity: 0;
     }
-  }
+ }
 
-  @media (min-width: 1330px) {
+  @media (min-width: 2330px) {
 
     .main{
       width: calc(100% - 200px);
