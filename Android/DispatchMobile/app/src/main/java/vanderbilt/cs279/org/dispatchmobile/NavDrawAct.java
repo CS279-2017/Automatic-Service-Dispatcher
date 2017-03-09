@@ -194,8 +194,8 @@ public class NavDrawAct extends AppCompatActivity
             changeActiveFragment(new TaskListFrag());
         } else if (id == R.id.nav_past_jobs) {
             changeActiveFragment(new CompletedTaskListFrag());
-            Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
-            toast.show();
+            //Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
+            //toast.show();
         } else if (id == R.id.nav_settings) {
             changeActiveFragment(new SettingsFragment());
             /*Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);

@@ -3,18 +3,19 @@ from django.http import JsonResponse
 from django.shortcuts import render, HttpResponseRedirect, HttpResponse
 from django.contrib.auth import logout, authenticate, login
 from pyfcm import FCMNotification
+import openpyxl
 import urllib
 import base64
 
 from django.views.decorators.csrf import csrf_exempt
 
 from dispatcher.forms import LoginForm
-from dispatcher.models import Task, Profile, Sensor, Job, Location
+from dispatcher.models import Task, Profile, Pad, Skill, Location, Well
 from django.contrib.auth.models import User
 
 from django.utils import timezone
-import math, json, pytz, datetime
-from random import randint
+import math, json, pytz, datetime, decimal
+from random import randint, uniform
 
 
 @login_required
@@ -25,14 +26,27 @@ def index(request):
     else:
         return render(request, 'screens/dashboard.html', {})
 
+# Map page
+
+@login_required
+def get_all_sensors(request):
+    user = Profile.objects.get(user=request.user)
+    return JsonResponse({"sensors": user.get_pads()})
+
+# Map/Workers Page
+
+@login_required
+def get_all_workers(request):
+    user = Profile.objects.get(user=request.user)
+    return JsonResponse({"users": user.get_my_workers()})
+
 
 @login_required
 def get_current_user(request):
-    user = request.user
-    return JsonResponse({'username': user.username, 'firstName': user.first_name, 'lastName': user.last_name,
-                         'email': user.email, 'id': user.pk})
+    user = Profile.objects.get(user=request.user)
+    return JsonResponse(user.get_json())
 
-# tODO change name
+
 @login_required
 def get_possible_tasks(request):
     user = Profile.objects.get(user=request.user)
@@ -93,11 +107,11 @@ def delegate(request):
         except KeyError:
             date = timezone.now()
         metric = tag["metric"]
-        sensor = Sensor.objects.get(sensorId=int(sensorId))
-        job = Job.objects.get(title=metric)
-    except Sensor.DoesNotExist:
+        sensor = Pad.objects.get(sensorId=int(sensorId))
+        skill = Skill.objects.get(title=metric)
+    except Pad.DoesNotExist:
         return JsonResponse({"error": "No such sensor"})
-    except Job.DoesNotExist:
+    except Skill.DoesNotExist:
         return JsonResponse({"error": "No such job type"})
     except KeyError:
         return JsonResponse({"error": "Key Error"})
@@ -105,8 +119,8 @@ def delegate(request):
     smallest = -1
     # for all users that can solve the task
     # sample is 0.313+0.1 for each queued (to account for distance)
-    task = Task.objects.create(sensor=sensor, job=job, date=date)
-    for user in Profile.objects.filter(jobs=job, admin=False):
+    task = Task.objects.create(pad=sensor, skill=skill, date=date)
+    for user in Profile.objects.filter(skills=skill, admin=False):
         location = user.current_location()
         distance = math.sqrt(math.pow(abs(sensor.location.lat-location.lat), 2) +
                              math.pow(abs(sensor.location.longitude-location.longitude), 2))
@@ -123,7 +137,7 @@ def delegate(request):
     # Now push notification to user
     # correct_user.push_notification(title="New Task", body=metric+" at Sensor "+sensorId)
     return JsonResponse({"result": "success", # 'workerUsername': task.worker.user.username, 'workerId': task.worker.pk,
-                         'name': task.job.name, 'date': task.date, 'taskId': task.pk})
+                         'name': task.skill.name, 'date': task.date, 'taskId': task.pk})
 
 
 @csrf_exempt
@@ -147,27 +161,6 @@ def create_sample_task(request):
     print(encoded_string)
     return JsonResponse({})
 
-# operator APIs
-@login_required
-def get_all_workers(request):
-    userlist = []
-    for user in Profile.objects.filter(admin=False):
-        task = user.current_task()
-        userlist.append({'firstName': user.user.first_name, 'lastName': user.user.last_name, 'email': user.user.email,
-                         'id': user.user.pk, 'profession': user.profession, 'activeTask': task,
-                         "lat": user.current_location().lat, "long": user.current_location().longitude,
-                         "numActive": user.tasks.filter(active=True).count(), 'emailHash': user.email_hash(),
-                         "numDone": user.tasks.filter(active=False).count()})
-    return JsonResponse({"users": userlist})
-
-
-@login_required
-def get_all_sensors(request):
-    sensor_list = []
-    for sensor in Sensor.objects.all():
-        sensor_list.append({"sensor": sensor.sensorId, "lat": sensor.location.lat, "long": sensor.location.longitude,
-                            "state": sensor.get_state()})
-    return JsonResponse({"sensors": sensor_list})
 
 
 @login_required
@@ -175,31 +168,9 @@ def get_totals_data(request):
     active = Task.objects.filter(active=True).count()
     done = Task.objects.filter(active=False).count()
     num_users = Profile.objects.filter(admin=False).count()
-    eventsPerPad = {"labels": [], "data": [], "series": []}
-    skills = Job.objects.all()
-    for skill in skills:
-        eventsPerPad["series"].append([skill.name])
-    for pad in Sensor.objects.all():
-        eventsPerPad["labels"].append("Pad "+pad.sensorId)
-        data = []
-        for skill in skills:
-            data.append(Task.objects.filter(sensor=pad, job=skill).count())
-        eventsPerPad["data"].append(data)
-    times = {"labels": [], "data": [], "series": []}
-    times["series"].append(["Average Times"])
-    for skill in Job.objects.all():
-        tasks = Task.objects.filter(active=False, job=skill)
-        sum = 0
-        count = tasks.count()
-        for task in tasks:
-            sum += (task.datecompleted-task.start_date).seconds
-        if count == 0:
-            times["data"].append(0)
-        else:
-            times["data"].append(sum/float(3600*count))
-        times["labels"].append(skill.name)
-    return JsonResponse({"numActive": active, "numDone": done, "numUsers": num_users, "eventsPerPad": eventsPerPad,
-                         "timeChart": times})
+    user = Profile.objects.get(user=request.user)
+    return JsonResponse({"numActive": active, "numDone": done, "numUsers": num_users, "timeChart": user.monthly_time_spent(),
+                         "waterHauled": user.monthly_volume_hauled(), "avgVolume": user.average_water_level_at_request()})
 
 
 def logout_view(request):
@@ -239,52 +210,52 @@ def initialize(request):
     loc6 = Location.objects.create(lat=37.6, longitude=-121.5)  # lat=36, longitude=-86.75)  # mechanic
     loc7 = Location.objects.create(lat=38, longitude=-122)  # lat=36.3, longitude=-86.75)  # other mechanic
 
-    j1 = Job.objects.create(title="LOW_VOLTAGE", name="Low Voltage")
-    j2 = Job.objects.create(title="HIGH_VOLTAGE", name="High Voltage")
-    j3 = Job.objects.create(title="LOW_PRESSURE", name="Low Pressure")
-    j4 = Job.objects.create(title="HIGH_PRESSURE", name="High Pressure")
-    j5 = Job.objects.create(title="TEMPERATURE_CHANGE", name="Temperature Change")
-    j6 = Job.objects.create(title="HIGH_TEMPERATURE", name="High Temperature")
+    j1 = Skill.objects.create(title="LOW_VOLTAGE", name="Low Voltage")
+    j2 = Skill.objects.create(title="HIGH_VOLTAGE", name="High Voltage")
+    j3 = Skill.objects.create(title="LOW_PRESSURE", name="Low Pressure")
+    j4 = Skill.objects.create(title="HIGH_PRESSURE", name="High Pressure")
+    j5 = Skill.objects.create(title="TEMPERATURE_CHANGE", name="Temperature Change")
+    j6 = Skill.objects.create(title="HIGH_TEMPERATURE", name="High Temperature")
 
-    s1 = Sensor.objects.create(sensorId=1, location=loc1)
-    s2 = Sensor.objects.create(sensorId=2, location=loc2)
-    s3 = Sensor.objects.create(sensorId=3, location=loc3)
-    s4 = Sensor.objects.create(sensorId=4, location=loc4)
+    s1 = Pad.objects.create(sensorId=1, location=loc1)
+    s2 = Pad.objects.create(sensorId=2, location=loc2)
+    s3 = Pad.objects.create(sensorId=3, location=loc3)
+    s4 = Pad.objects.create(sensorId=4, location=loc4)
 
     admin = User.objects.create_superuser(username="admin", email="sam@gmail.com", password="engineering",
                                           first_name="CSX278", last_name="Class")
     ad = Profile.objects.create(user=admin, profession="Operator", admin=True)
-    ad.jobs.add(j1)
-    ad.jobs.add(j2)
-    ad.jobs.add(j3)
-    ad.jobs.add(j4)
-    ad.jobs.add(j5)
-    ad.jobs.add(j6)
+    ad.skills.add(j1)
+    ad.skills.add(j2)
+    ad.skills.add(j3)
+    ad.skills.add(j4)
+    ad.skills.add(j5)
+    ad.skills.add(j6)
     ad.locations.add(loc5)
     ad.save()
     u1 = User.objects.create_user(username="electrician", email="electrician@gmail.com", password="engineering", first_name="Joe",
                                   last_name="Electrician")
     p1 = Profile.objects.create(user=u1, profession="Electrician", admin=False)
-    p1.jobs.add(j1)
-    p1.jobs.add(j2)
+    p1.skills.add(j1)
+    p1.skills.add(j2)
     p1.locations.add(loc5)
     p1.save()
     u2 = User.objects.create_user(username="mechanic", email="mechanic@gmail.com", password="engineering", first_name="Ben",
                                   last_name="Mechanic")
     p2 = Profile.objects.create(user=u2, profession="Mechanic", admin=False)
-    p2.jobs.add(j3)
-    p2.jobs.add(j4)
-    p2.jobs.add(j5)
-    p2.jobs.add(j6)
+    p2.skills.add(j3)
+    p2.skills.add(j4)
+    p2.skills.add(j5)
+    p2.skills.add(j6)
     p2.locations.add(loc6)
     p2.save()
     u3 = User.objects.create_user(username="mechanic2", email="mechanic2@gmail.com", password="engineering", first_name="Other",
                                   last_name="Mechanic")
     p3 = Profile.objects.create(user=u3, profession="Mechanic", admin=False)
-    p3.jobs.add(j3)
-    p3.jobs.add(j4)
-    p3.jobs.add(j5)
-    p3.jobs.add(j6)
+    p3.skills.add(j3)
+    p3.skills.add(j4)
+    p3.skills.add(j5)
+    p3.skills.add(j6)
     p3.locations.add(loc7)
     p3.save()
 
@@ -310,7 +281,7 @@ def initialize(request):
         hours = randint(1, 15)
         end_date = date+datetime.timedelta(hours=randint(hours+1, hours+10))+datetime.timedelta(minutes=randint(0,55))
         start_date = date+datetime.timedelta(hours=hours)
-        t1 = Task.objects.create(sensor=sensor, job=job, date=date, start_date=start_date,
+        t1 = Task.objects.create(pad=sensor, skill=job, date=date, start_date=start_date,
                                  datecompleted=end_date, active=False)
         if job == j1 or job == j2:
             p1.tasks.add(t1)
@@ -338,7 +309,7 @@ def initialize(request):
         elif random == 3:
             job = j3
         date = datetime.datetime(2017, randint(1, 2), 23, randint(1, 20), randint(1, 55), randint(1,55), tzinfo=pytz.utc)
-        t1 = Task.objects.create(sensor=sensor, job=job, date=date,
+        t1 = Task.objects.create(pad=sensor, skill=job, date=date,
                                  datecompleted=date+datetime.timedelta(hours=randint(1, 15)), active=True)
         if job == j1 or job == j2:
             t1.possible_workers.add(p1)
@@ -346,3 +317,98 @@ def initialize(request):
             t1.possible_workers.add(p2)
             t1.possible_workers.add(p3)
     return JsonResponse({})
+
+
+def init_2(request):
+    wb = openpyxl.load_workbook('dispatcher/views/locations.xlsx')
+    wells = []
+    sheet = wb.get_sheet_by_name('Total Wells')
+    # Lats start in G3, Longs in H3, id in L3 to 63039
+    for i in range(33, 50):
+        try:
+            admin = User.objects.get(first_name=sheet['F'+str(i)].value)
+            ad = Profile.objects.get(user=admin)
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            admin = User.objects.create_superuser(username="admin", email="admin@glow.com", password="engineering",
+                                                  first_name=sheet['F'+str(i)].value, last_name="")
+            ad = Profile.objects.create(user=admin, profession="Operator", admin=True)
+            location = Location.objects.create(lat=decimal.Decimal(sheet['G'+str(i)].value), longitude=decimal.Decimal(sheet['H'+str(i)].value))
+            ad.locations.add(location)
+            ad.save()
+
+        location = Location.objects.create(lat=decimal.Decimal(sheet['G'+str(i)].value), longitude=decimal.Decimal(sheet['H'+str(i)].value))
+        s = Pad.objects.create(sensorId=sheet['L'+str(i)].value, location=location, operator=ad)
+        for j in range(0, int(sheet['I'+str(i)].value)):
+            Well.objects.create(pad=s, water_capacity=100, water_level=100)
+
+    skill = Skill.objects.create(title="WATER", name="Water Hauling")
+
+    u1 = User.objects.create_user(username="wh1", email="wh1@glow.com", password="engineering", first_name="Water",
+                                  last_name="Hauler")
+    p1 = Profile.objects.create(user=u1, profession="Water Hauler", admin=False)
+    p1.skills.add(skill)
+    loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
+    p1.locations.add(loc1)
+    p1.save()
+
+    u2 = User.objects.create_user(username="wh2", email="wh2@glow.com", password="engineering", first_name="Water",
+                                  last_name="Driver")
+    p2 = Profile.objects.create(user=u2, profession="Water Hauler", admin=False)
+    p2.skills.add(skill)
+    loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
+    p2.locations.add(loc1)
+    p2.save()
+
+    u3 = User.objects.create_user(username="wh3", email="wh3@glow.com", password="engineering", first_name="Water",
+                                  last_name="Filler")
+    p3 = Profile.objects.create(user=u3, profession="Mechanic", admin=False)
+    p3.skills.add(skill)
+    loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
+    p3.locations.add(loc1)
+    p3.save()
+
+    # create past tasks
+    skill = skill
+    sensors = Pad.objects.all()
+    users = Profile.objects.filter(admin=False)
+    for i in range(0, 30):
+        date = datetime.datetime(2017, randint(1, 2), randint(1, 23), randint(1, 20), randint(1, 55), randint(1, 55), tzinfo=pytz.utc)
+        hours = randint(1, 15)
+        end_date = date+datetime.timedelta(hours=randint(hours+1, hours+10))+datetime.timedelta(minutes=randint(0,55))
+        start_date = date+datetime.timedelta(hours=hours)
+        level = randint(0, 50)
+        t1 = Task.objects.create(pad=sensors[randint(0, 16)], skill=skill, date=date, start_date=start_date,
+                                 datecompleted=end_date, active=False, level_at_request=level, tank_capacity=100, amount_hauled=100-level)
+        user = users[randint(0, 2)]
+        user.tasks.add(t1)
+        user.locations.add(t1.pad.location)
+        user.save()
+
+    # create possible tasks
+    # for i in range(0, 30):
+    #     sensor = s4
+    #     job = j4
+    #     random = randint(1, 4)
+    #     if random == 1:
+    #         sensor = s1
+    #     elif random == 2:
+    #         sensor = s2
+    #     elif random == 3:
+    #         sensor = s3
+    #     random = randint(1, 4)
+    #     if random == 1:
+    #         job = j1
+    #     elif random == 2:
+    #         job = j2
+    #     elif random == 3:
+    #         job = j3
+    #     date = datetime.datetime(2017, randint(1, 2), 23, randint(1, 20), randint(1, 55), randint(1,55), tzinfo=pytz.utc)
+    #     t1 = Task.objects.create(sensor=sensor, job=job, date=date,
+    #                              datecompleted=date+datetime.timedelta(hours=randint(1, 15)), active=True)
+    #     if job == j1 or job == j2:
+    #         t1.possible_workers.add(p1)
+    #     else:
+    #         t1.possible_workers.add(p2)
+    #         t1.possible_workers.add(p3)
+
+    return JsonResponse({"wells": wells})

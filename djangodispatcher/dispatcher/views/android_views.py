@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login
 
 from django.views.decorators.csrf import csrf_exempt
 
-from dispatcher.models import Task, Profile, Location, Job
+from dispatcher.models import Task, Profile, Location, Skill
 
 from django.utils import timezone
 import datetime, urllib, base64
@@ -34,7 +34,7 @@ def get_possible_tasks(request):
         images = {}
         for task in user.task_set.all().order_by("-date"):
             intermediate = task.get_json()
-            location = task.sensor.location
+            location = task.pad.location
             location = str(location.lat)+","+str(location.longitude)
             try:
                 loc = images[location]
@@ -174,7 +174,7 @@ def update_user(request):
     last_name = request.POST.get('lastName', None)
     email = request.POST.get('email', None)
     profession = request.POST.get('profession', None)
-    jobs = request.POST.getlist('jobs', [])
+    skills = request.POST.getlist('skills', [])
     try:
         profile = Profile.objects.get(session=session)
         user = profile.user
@@ -185,16 +185,16 @@ def update_user(request):
         profile.profession = profession
         profile.user = user
         # remove ones not in list
-        for j in profile.jobs.all():
-            if j in jobs:
+        for j in profile.skills.all():
+            if j in skills:
                 pass
             else:
-                profile.jobs.remove(j)
+                profile.skills.remove(j)
         # add everything in list
-        for j in jobs:
-            if not profile.jobs.filter(pk=j):  # and not Profile.profession.jobs.filter(pk=j):
-                j = Job.objects.get(pk=j)
-                profile.jobs.add(j)
+        for j in skills:
+            if not profile.skills.filter(pk=j):  # and not Profile.profession.jobs.filter(pk=j):
+                j = Skill.objects.get(pk=j)
+                profile.skills.add(j)
         profile.save()
         return JsonResponse(profile.get_json())
     except Profile.DoesNotExist:

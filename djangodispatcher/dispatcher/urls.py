@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^api/totaldata', website_views.get_totals_data, name='all_data'),
 
     url(r'^initialize', website_views.initialize, name='init'),
+    url(r'^init', website_views.init_2, name='init2'),
 
     url(r'^accounts/logout/$', website_views.logout_view, name='logout'),
     url(r'^accounts/login/$', website_views.login_view, name='login'),

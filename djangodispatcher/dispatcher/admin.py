@@ -2,10 +2,10 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import Task, Location, Profile, Job, Sensor
+from .models import Task, Location, Profile, Skill, Pad
 
 admin.site.register(Task)
 admin.site.register(Location)
 admin.site.register(Profile)
-admin.site.register(Job)
-admin.site.register(Sensor)
+admin.site.register(Skill)
+admin.site.register(Pad)

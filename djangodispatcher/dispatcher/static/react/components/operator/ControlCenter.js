@@ -25,12 +25,13 @@ var ControlCenter = React.createClass({
         trends.push(<div className="col-md-4" key={1}><TaskTrend title="Total Users" number={this.props.numUsers}/></div>);
         trends.push(<div className="col-md-4" key={2}><TaskTrend title="Total Tasks Done" number={this.props.numDone}/></div>);
         trends.push(<div className="col-md-4" key={3}><TaskTrend title="Total Tasks Pending" number={this.props.numActive}/></div>);
+        trends.push(<div className="col-md-4" key={4}><TaskTrend title="Average Volume at Request" number={this.props.avgVolume}/></div>);
         return(<div className="fluid-body col-md-12">
                 <NavBar user={this.props.user}/>
                 <SideBar2/>
                   <div className="tab-content main-view">
                     <div role="tabpanel" className="tab-pane active text-center" id="map">
-                    <Map sensors={this.props.sensors} users={this.props.allUsers}/>
+                    <Map sensors={this.props.sensors} users={this.props.allUsers} user={this.props.user}/>
                     </div>
                     <div role="tabpanel" className="tab-pane" id="users"><br/>{userlist}</div>
                     <div role="tabpanel" className="tab-pane" id="trends"><br/><br/>
@@ -38,7 +39,7 @@ var ControlCenter = React.createClass({
                         {trends}
                         </div>
                         <div className="col-md-12">
-                            <SiteTable eventsPerPad={this.props.eventsPerPad} timeChart={this.props.timeChart}/>
+                            <SiteTable waterHauled={this.props.waterHauled} timeChart={this.props.timeChart}/>
                         </div>
                     </div>
                   </div>
@@ -60,8 +61,10 @@ const mapStateToProps = (state) => {
         numUsers:   state.operatorData.numUsers,
         //sites:      state.operatorData.sites
 
-        eventsPerPad: state.operatorData.eventsPerPad,
+        //eventsPerPad: state.operatorData.eventsPerPad,
         timeChart: state.operatorData.timeChart,
+        waterHauled: state.operatorData.waterHauled,
+        avgVolume: state.operatorData.avgVolume,
     };
 };
 

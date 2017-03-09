@@ -3,14 +3,19 @@ var Map = React.createClass( {
        return {sensorMarkers: []}
     },
   componentDidMount: function() {
-    //var nashville = {lat: 36.1627, lng: -86.7816};
-    var nashville = {lat: 37.384448, lng: -122.097244};
+    var nashville = {lat: 36.1627, lng: -86.7816};
+    //var nashville = {lat: parseFloat(this.props.user.lat), lng: parseFloat(this.props.user.long)};
+    console.log(nashville);
     this.map = new google.maps.Map(this.refs.map, {
-      zoom: 9,
+      zoom: 11,
       center: nashville
     });
   },
   componentWillReceiveProps: function(newProps){
+    if(newProps.user != this.props.user){
+        var center = {lat: parseFloat(newProps.user.lat), lng: parseFloat(newProps.user.long)};
+        this.map.panTo(center);
+    }
     this.removeAllMarkers();
     if(newProps.sensors!=undefined){
         for(var i=0;i<newProps.sensors.length;i++){
@@ -38,7 +43,12 @@ var Map = React.createClass( {
                   //label: "S"+newProps.sensors[i].sensor,
                 });
             }
-            var infowindow = new google.maps.InfoWindow({ content: "<p>Pad "+newProps.sensors[i].sensor+"</p>" });
+            var info = "<p>Pad "+newProps.sensors[i].sensor+"</p>";
+            for(var j = 0; j<newProps.sensors[i].wells.length;j++){
+                var well = newProps.sensors[i].wells[j];
+                info += "</br><p>Well "+(j+1)+": "+100*well.level/well.capacity+"% Full</p>"
+            }
+            var infowindow = new google.maps.InfoWindow({ content: info });
             this.bindInfoWindow(marker, this.map, infowindow)
             this.state.sensorMarkers.push(marker)
         }
