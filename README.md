@@ -1,4 +1,4 @@
-![alt tag](https://github.com/CS279-2017/Automatic-Service-Dispatcher/blob/daily/sam_hurd/OilAndGas-PossibleLogov2.png)
+![alt tag](https://github.com/CS279-2017/Automatic-Service-Dispatcher/blob/daily/sam_hurd/OilAndGas-PossibleLogov3.png)
 # Geo - LOcated Workforce:
 # Uber-style Labor Dispatch Using Remote Monitoring Data
 
