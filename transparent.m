@@ -1,4 +1,4 @@
-I = imread('OilAndGas-PossibleLogov2.png');
+I = imread('OilAndGas-PossibleLogov3.png');
 figure, image(I);
 %57, 58, 61
 R = I(:,:,1);
