@@ -152,7 +152,9 @@ class Task(models.Model):
             minutes /= 60
         return {'taskId': self.pk, 'name': self.skill.name, 'date': self.date,  'start_date': self.start_date, # 'workerId': self.worker.pk,
                 "sensor": self.pad.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen, "minutesOpen": minutes,
-                "lattitude": self.pad.location.lat, "longitude": self.pad.location.longitude}
+                "lattitude": self.pad.location.lat, "longitude": self.pad.location.longitude,
+                "levelAtRequest": self.level_at_request, 'tankCapacity': self.tank_capacity}
+
 
 class Pad(models.Model):
     sensorId = models.CharField(max_length=50, default="0", unique=True)

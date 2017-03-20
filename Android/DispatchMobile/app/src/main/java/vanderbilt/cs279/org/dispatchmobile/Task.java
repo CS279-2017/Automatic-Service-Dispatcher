@@ -19,6 +19,8 @@ public class Task {
 
     int hoursOpen;
     int minutesOpen;
+    int levelAtRequest;
+    int tankCapacity;
 
     @Override
     public String toString() {

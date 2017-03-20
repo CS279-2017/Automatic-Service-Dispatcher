@@ -95,6 +95,7 @@ def start_task(request):
         user = Profile.objects.get(session=session)
         task = Task.objects.get(pk=task_id)
         task.active = True
+        task.start_date = datetime.datetime.now()
         user.tasks.add(task)
         task.possible_workers.clear()
         task.start_date = datetime.datetime.today()

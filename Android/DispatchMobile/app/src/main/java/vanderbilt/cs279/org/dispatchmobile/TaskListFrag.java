@@ -273,12 +273,18 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
             taskName.setText(task.name+" at Pad "+task.sensor);
             hours.setText(getTime(task.date));
 
+            ProgressBar mProgress = (ProgressBar) convertView.findViewById(R.id.tankProgress);
+            mProgress.setProgress(100*task.levelAtRequest/task.tankCapacity);
+            TextView tankProgressWords = (TextView) convertView.findViewById(R.id.tankProgressWords);
+            tankProgressWords.setText("Tank Level: "+ task.levelAtRequest+" of "+task.tankCapacity);
+
             return convertView;
 
         }
 
         private String getTime(String date){
             String time = "";
+            Log.e("Date", date);
             DateFormat m_ISO8601Local = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
             try {
                 SimpleDateFormat localDateFormat = new SimpleDateFormat("h:mm a");
