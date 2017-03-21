@@ -388,15 +388,15 @@ def init_2(request):
         loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
         user.locations.add(loc1)
         user.save()
-
-    date = datetime.datetime(2017, datetime.date.today().month, datetime.date.today().day, randint(1, 20), randint(1, 55), randint(1, 55), tzinfo=pytz.utc)
-    level = randint(0, 50)
-    t1 = Task.objects.create(pad=sensors[randint(0, 16)], skill=skill, date=date, active=True, level_at_request=level,
-                             tank_capacity=100)
-    t1.possible_workers.add(users[0])
-    t1.possible_workers.add(users[1])
-    t1.possible_workers.add(users[2])
-    t1.save()
+    for i in range(0, 10):
+        date = datetime.datetime(2017, datetime.date.today().month, datetime.date.today().day, randint(1, 20), randint(1, 55), randint(1, 55), tzinfo=pytz.utc)
+        level = randint(0, 50)
+        t1 = Task.objects.create(pad=sensors[randint(0, 16)], skill=skill, date=date, active=True, level_at_request=level,
+                                 tank_capacity=100)
+        t1.possible_workers.add(users[0])
+        t1.possible_workers.add(users[1])
+        t1.possible_workers.add(users[2])
+        t1.save()
 
     # create possible tasks
     # for i in range(0, 30):
