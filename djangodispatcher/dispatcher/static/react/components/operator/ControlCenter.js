@@ -1,11 +1,12 @@
 import { connect } from 'react-redux'
-import { fetchCurrentUser, fetchAllUsers, fetchAllSensors, fetchTotalData} from '../../actions'
+import { fetchCurrentUser, fetchAllUsers, fetchAllSensors, fetchTotalData, createTask} from '../../actions'
 import UserPanel from './UserPanel'
 import Map from './Map'
 import TaskTrend from './TaskTrend'
 import SiteTable from './SiteTable'
 import NavBar from './NavBar'
 import SideBar2 from './SideBar2'
+import ManualTaskModal from './ManualTaskModal'
 
 var ControlCenter = React.createClass({
     componentDidMount: function(){
@@ -43,7 +44,7 @@ var ControlCenter = React.createClass({
                         </div>
                     </div>
                   </div>
-
+                <ManualTaskModal sensors={this.props.sensors} sendData={this.props.createTask}/>
             </div>);
     }
 });//                    <Map sensors={this.props.sensors} users={this.props.allUsers}/>
@@ -82,7 +83,10 @@ const mapDispatchToProps = (dispatch) => {
         },
         fetchTotalData:() => {
             dispatch(fetchTotalData());
-        }
+        },
+        createTask:(data) => {
+            dispatch(createTask(data));
+        },
     }
 };
 

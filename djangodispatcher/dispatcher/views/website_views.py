@@ -102,6 +102,7 @@ def delegate(request):
     # TODO: take into account if a user is already at that location
     # TODO: python 3 receives 'bytes' instead of string, so data needs to be decoded
     # sample_data = request.body.decode('utf-8')
+    print(request.body)
     body = json.loads(sample_data)
     try:
         tag = body['tag']
@@ -116,10 +117,13 @@ def delegate(request):
         sensor = Pad.objects.get(sensorId=int(sensorId))
         skill = Skill.objects.get(title=metric)
     except Pad.DoesNotExist:
+        print("Pad")
         return JsonResponse({"error": "No such sensor"})
     except Skill.DoesNotExist:
+        print("Skill")
         return JsonResponse({"error": "No such job type"})
     except KeyError:
+        print("Key")
         return JsonResponse({"error": "Key Error"})
     correct_user = None
     smallest = -1
@@ -138,6 +142,7 @@ def delegate(request):
     else:  # Add task and create notification
         correct_user.tasks.add(task)
         correct_user.push_notification(title="New Task", body=metric+" at Sensor "+sensorId)
+    print(correct_user)
     task.save()
     return JsonResponse({"result": "success", 'name': task.skill.name, 'date': task.date, 'taskId': task.pk})
 
@@ -148,7 +153,7 @@ This endpoint posts data to the delegate api to test functionality
 @csrf_exempt
 def create_sample_task(request):
     date = datetime.datetime(2017, randint(1, 2), randint(1, 23), randint(1, 20), randint(1, 55), randint(1, 55), tzinfo=pytz.utc)
-    r = requests.post("/api/delegate/", data={'tag': {'metric': 'WATER HAULING'},
+    r = requests.post("http://localhost:8000/api/delegate/", json={'tag': {'metric': 'WATER HAULING'},
                                               'data': {'sensorID': '857892', 'date': date, 'waterLevel': 79}})
     return JsonResponse({})
 
