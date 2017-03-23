@@ -191,7 +191,8 @@ public class NavDrawAct extends AppCompatActivity
             // Handle the camera action
             changeActiveFragment(new MapViewFragment());
         } else if (id == R.id.nav_get_list) {
-            changeActiveFragment(new TaskListFrag());
+            //changeActiveFragment(new TaskListFrag());
+            changeActiveFragment(new NextTaskFrag());
         } else if (id == R.id.nav_past_jobs) {
             changeActiveFragment(new CompletedTaskListFrag());
             //Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);

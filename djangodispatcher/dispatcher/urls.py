@@ -16,14 +16,13 @@ urlpatterns = [
     url(r'^api/sensors', website_views.get_all_sensors, name='all_sensors'),
     url(r'^api/totaldata', website_views.get_totals_data, name='all_data'),
 
-    url(r'^initialize', website_views.initialize, name='init'),
     url(r'^init', website_views.init_2, name='init2'),
 
     url(r'^accounts/logout/$', website_views.logout_view, name='logout'),
     url(r'^accounts/login/$', website_views.login_view, name='login'),
 
     # android
-    url(r'^api/android/possible_tasks', android_views.get_possible_tasks, name='possible_tasks_android'), #todo change in android
+    url(r'^api/android/next_task', android_views.get_next_task, name='possible_tasks_android'), #todo change in android
     url(r'^api/android/previous_tasks', android_views.get_previous_tasks, name='previous_tasks_android'), #todo change in android
     url(r'^api/android/my_task', android_views.get_my_task, name='my_task_android'), #todo change in android
     url(r'^api/android/update_location', android_views.update_location, name='android_location_updater'),

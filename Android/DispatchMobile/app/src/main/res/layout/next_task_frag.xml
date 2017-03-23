@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <ProgressBar
+        android:layout_centerHorizontal="true"
+        android:id="@+id/possible_task_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="200dp"
+        android:visibility="gone" />
+    <TextView
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:id="@+id/taskTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#000"
+        android:textSize="55px"
+        android:textStyle="bold"
+        android:text="Task" />
+    <ProgressBar
+        android:id="@+id/tankProgress"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/taskTitle"
+
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="5dp" />
+    <TextView
+        android:id="@+id/tankProgressWords"
+        android:gravity="center"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tankProgress"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="25dp"
+        android:text="Tank Level"
+        />
+    <TextView
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#323232"
+        android:layout_alignBottom="@+id/locationImage"
+        android:text="Time" />
+    <ImageView
+        android:id="@+id/locationImage"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/acceptButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#59b048"
+        android:layout_below="@id/locationImage"
+        android:background="#0000"
+        android:padding="0px"
+        android:layout_alignParentRight="true"
+        android:text="Start" />
+
+</RelativeLayout>

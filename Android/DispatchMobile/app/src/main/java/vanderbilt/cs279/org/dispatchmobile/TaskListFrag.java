@@ -1,4 +1,4 @@
-package vanderbilt.cs279.org.dispatchmobile;
+/*package vanderbilt.cs279.org.dispatchmobile;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -47,9 +47,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-/**
+*//**
  * Created by gpettet on 2017-02-23.
- */
+ *//*
 
 public class TaskListFrag extends ListFragment implements AdapterView.OnItemClickListener {
     //private TasksAdapter mAdapter;
@@ -112,7 +112,7 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
 
         TextView textView = (TextView) view.findViewById(R.id.additionalData);
         textView.setVisibility(textView.getVisibility()==View.VISIBLE ? View.GONE : View.VISIBLE);
-        /*if ( textView.getVisibility() == View.GONE) {
+        *//*if ( textView.getVisibility() == View.GONE) {
             //expandedChildList.set(arg2, true);
             textView.setVisibility(View.VISIBLE);
         }
@@ -120,9 +120,9 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
         {
             //expandedChildList.set(arg2, false);
             textView.setVisibility(View.GONE);
-        }*/
+        }*//*
         //TODO: finish task
-        /*AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());//getActivity());
+        *//*AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());//getActivity());
         builder.setMessage(message).setTitle("Complete Task")
                 .setPositiveButton("Complete", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -136,7 +136,7 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
             }
         });
         AlertDialog dialog = builder.create();
-        dialog.show();*/
+        dialog.show();*//*
     }
 
     private void getTasks(){
@@ -296,9 +296,9 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
         }
     }
 
-    /**
+    *//**
      * Shows the progress UI and hides the login form.
-     */
+     *//*
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -308,14 +308,14 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
             getListView().getEmptyView().setVisibility(show ? View.GONE : View.VISIBLE);
-            /*mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            *//*mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
             mLoginFormView.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
-            });*/
+            });*//*
 
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mProgressView.animate().setDuration(shortAnimTime).alpha(
@@ -332,4 +332,4 @@ public class TaskListFrag extends ListFragment implements AdapterView.OnItemClic
             //mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
-}
+}*/

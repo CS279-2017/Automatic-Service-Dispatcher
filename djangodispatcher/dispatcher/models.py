@@ -47,7 +47,6 @@ class Profile(models.Model):
 
     def current_task(self):
         task = self.tasks.filter(active=True)
-        print(task)
         if not task:
             return None
         else:
@@ -122,7 +121,7 @@ class Profile(models.Model):
 
 
 class Task(models.Model):
-    possible_workers = models.ManyToManyField(Profile, blank=True)
+    declined_workers = models.ManyToManyField(Profile, blank=True)
     pad = models.ForeignKey("Pad", blank=True, null=True)
     skill = models.ForeignKey(Skill, blank=True, null=True)
     level_at_request = models.DecimalField(max_digits=8, decimal_places=2, default=0)

@@ -1,4 +1,4 @@
-package vanderbilt.cs279.org.dispatchmobile;
+/*package vanderbilt.cs279.org.dispatchmobile;
 
 import android.app.ListActivity;
 import android.content.Context;
@@ -242,4 +242,4 @@ public class MainActivity extends ListActivity {
             return time;
         }
     }
-}
+}*/

@@ -46,8 +46,8 @@ public interface GlowAPI {
 
 
     @FormUrlEncoded
-    @POST("/api/android/possible_tasks/")
-    Call<TaskList> loadPossibleTasks(@Field("session")String session, @Field("deviceId")String deviceId);
+    @POST("/api/android/next_task/")
+    Call<Task> loadNextTask(@Field("session")String session, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/api/android/previous_tasks/")

@@ -23,29 +23,33 @@ def get_my_task(request):
         return JsonResponse({"result": "bad"}, status=401)
 
 @csrf_exempt
-def get_possible_tasks(request):
+def get_next_task(request):
     session = request.POST.get('session', -1)
     deviceId = request.POST['deviceId']
     try:
         user = Profile.objects.get(session=session)
         user.device = deviceId
         user.save()
-        mytask = []
+
         images = {}
-        for task in user.task_set.all().order_by("-date"):
-            intermediate = task.get_json()
-            location = task.pad.location
-            location = str(location.lat)+","+str(location.longitude)
-            try:
-                loc = images[location]
-                intermediate["image"] = loc
-            except KeyError:
-                result = urllib.urlopen("https://maps.googleapis.com/maps/api/staticmap?center="+location+"&zoom=15&size=400x400&markers=color:red|label:C|"+location+"&maptype=roadmap&key=AIzaSyCIlABW-dOGWbwCJP6o-KwNzbJhx73H_7k").read()
-                encoded_string = base64.b64encode(result)
-                images[location] = encoded_string
-                intermediate["image"] = encoded_string
-            mytask.append(intermediate)
-        return JsonResponse({'active_tasks': mytask})
+        try:
+            task = user.tasks.get(active=True, start_date__isnull=True)
+        except Task.DoesNotExist:
+            return JsonResponse({"result": "bad"}, status=401)
+
+        intermediate = task.get_json()
+        location = task.pad.location
+        location = str(location.lat)+","+str(location.longitude)
+        try:
+            loc = images[location]
+            intermediate["image"] = loc
+        except KeyError:
+            result = urllib.urlopen("https://maps.googleapis.com/maps/api/staticmap?center="+location+"&zoom=15&size=400x400&markers=color:red|label:C|"+location+"&maptype=roadmap&key=AIzaSyCIlABW-dOGWbwCJP6o-KwNzbJhx73H_7k").read()
+            encoded_string = base64.b64encode(result)
+            images[location] = encoded_string
+            intermediate["image"] = encoded_string
+
+        return JsonResponse(intermediate)
     except Profile.DoesNotExist:
         return JsonResponse({"result": "bad"}, status=401)
 
@@ -97,7 +101,7 @@ def start_task(request):
         task.active = True
         task.start_date = datetime.datetime.now()
         user.tasks.add(task)
-        task.possible_workers.clear()
+        # task.possible_workers.clear()
         task.start_date = datetime.datetime.today()
         task.save()
         user.save()
