@@ -44,7 +44,7 @@ def get_next_task(request):
             loc = images[location]
             intermediate["image"] = loc
         except KeyError:
-            result = urllib.urlopen("https://maps.googleapis.com/maps/api/staticmap?center="+location+"&zoom=15&size=400x400&markers=color:red|label:C|"+location+"&maptype=roadmap&key=AIzaSyCIlABW-dOGWbwCJP6o-KwNzbJhx73H_7k").read()
+            result = urllib.urlopen("https://maps.googleapis.com/maps/api/staticmap?center="+location+"&zoom=13&size=1500x1500&markers=color:red|label:C|"+location+"&maptype=roadmap&key=AIzaSyCIlABW-dOGWbwCJP6o-KwNzbJhx73H_7k").read()
             encoded_string = base64.b64encode(result)
             images[location] = encoded_string
             intermediate["image"] = encoded_string
