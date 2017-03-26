@@ -18,6 +18,9 @@ class Skill(models.Model):
     def __unicode__(self):
         return self.title
 
+    def json(self):
+        return {'title': self.title, 'name': self.name}
+
 
 class Location(models.Model):
     lat = models.DecimalField(max_digits=8, decimal_places=5)
@@ -26,6 +29,9 @@ class Location(models.Model):
 
     def __unicode__(self):
         return str(self.lat)+" " +str(self.longitude)
+
+    def json(self):
+        return {'lat': self.lat, 'longitude': self.longitude, 'time': self.time}
 
 
 class Profile(models.Model):
@@ -175,7 +181,7 @@ class Pad(models.Model):
         return wells
 
     def json(self):
-        return {"sensor": self.sensorId, "lat": self.location.lat, "long": self.location.longitude,
+        return {"sensor": self.sensorId, "lat": self.location.lat, "long": self.location.longitude, "locationId": self.location.pk,
                 "state": self.get_state(), "wells": self.get_wells()}
 
 

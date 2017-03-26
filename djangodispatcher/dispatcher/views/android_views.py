@@ -145,6 +145,7 @@ def check_session(request):
     except Profile.DoesNotExist:
         return JsonResponse({"result": "bad"}, status=401)
 
+# TODO: moved
 @csrf_exempt
 def update_location(request):
     session = request.POST.get('session', -1)
