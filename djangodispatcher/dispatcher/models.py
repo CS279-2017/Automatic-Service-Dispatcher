@@ -40,6 +40,7 @@ class Profile(models.Model):
     locations = models.ManyToManyField(Location)
     skills = models.ManyToManyField("Skill", blank=True)
     tasks = models.ManyToManyField("Task", blank=True)
+    truck_available_capacity = models.DecimalField(max_digits=8, decimal_places=2, default=100)
 
     admin = models.BooleanField(default=False)
     session = models.CharField(max_length=32, default="0")
@@ -80,7 +81,7 @@ class Profile(models.Model):
         return {'firstName': self.user.first_name, 'lastName': self.user.last_name, 'email': self.user.email,
                 'id': self.user.pk, 'profession': self.profession, 'emailHash': self.email_hash(),
                 "numDone": self.tasks.filter(active=False).count(), "sessionId": self.session, "skills": jobs,
-                'username': self.user.username,
+                'username': self.user.username, 'truckAvailableCapacity': self.truck_available_capacity,
                 'activeTask': task, "lat": self.current_location().lat, "long": self.current_location().longitude,
                 "numActive": self.tasks.filter(active=True).count()}
 
@@ -125,6 +126,18 @@ class Profile(models.Model):
                 volumes.append(cumulative)
         return {"months": months, "volume": volumes}
 
+    def monthly_manually_scheduled(self):
+        months = []
+        manual = []
+        not_manual = []
+        for i in range(1, 13):
+            months.append(datetime.date(1900, i, 1).strftime('%B'))
+            manually_scheduled = Task.objects.filter(start_date__month=i, manually_scheduled=True).count()
+            manual.append(manually_scheduled)
+            not_manually_scheduled = Task.objects.filter(start_date__month=i, manually_scheduled=False).count()
+            not_manual.append(not_manually_scheduled)
+        return {"months": months, "manual": manual, "notManual": not_manual}
+
 
 class Task(models.Model):
     declined_workers = models.ManyToManyField(Profile, blank=True)
@@ -132,6 +145,7 @@ class Task(models.Model):
     skill = models.ForeignKey(Skill, blank=True, null=True)
     level_at_request = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     tank_capacity = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    manually_scheduled = models.BooleanField(default=False)
 
     date = models.DateTimeField(default=timezone.now())
     start_date = models.DateTimeField(null=True)

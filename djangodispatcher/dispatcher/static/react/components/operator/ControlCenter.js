@@ -15,6 +15,9 @@ var ControlCenter = React.createClass({
         this.props.fetchAllSensors();
         this.props.fetchTotalData();
     },
+    componentWillReceiveProps: function(newValues){
+        $('#manualTaskModal').modal('hide');
+    },
     render: function() {
         var userlist = [];
         var trends = [];
@@ -40,7 +43,8 @@ var ControlCenter = React.createClass({
                         {trends}
                         </div>
                         <div className="col-md-12">
-                            <SiteTable waterHauled={this.props.waterHauled} timeChart={this.props.timeChart}/>
+                            <SiteTable waterHauled={this.props.waterHauled} timeChart={this.props.timeChart}
+                                        manuallyScheduled={this.props.manuallyScheduled}/>
                         </div>
                     </div>
                   </div>
@@ -66,6 +70,7 @@ const mapStateToProps = (state) => {
         timeChart: state.operatorData.timeChart,
         waterHauled: state.operatorData.waterHauled,
         avgVolume: state.operatorData.avgVolume,
+        manuallyScheduled: state.operatorData.manuallyScheduled,
     };
 };
 

@@ -14,7 +14,8 @@ var ManualTaskModal = React.createClass({
         var data = {tag: {metric: 'WATER'},
                     data: {sensorID: this.refs["sensor"].value,
                            date: date,
-                           waterLevel: this.refs["water_level"].value}}
+                           waterLevel: this.refs["water_level"].value,
+                           manuallyScheduled: true}}
         this.props.sendData(data);
     },
     render: function() {

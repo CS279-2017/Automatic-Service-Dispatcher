@@ -94,7 +94,8 @@ def complete_task(request):
 {tag: { metric: skill needed},
 data: {sensorID; sensorID,
        date: request date,
-       waterLevel: water level}}
+       waterLevel: water level,
+       manuallyScheduled: was this automatic or not}}
 '''
 @csrf_exempt
 def delegate(request):
@@ -102,11 +103,15 @@ def delegate(request):
     # TODO: take into account if a user is already at that location
     # TODO: python 3 receives 'bytes' instead of string, so data needs to be decoded
     # sample_data = request.body.decode('utf-8')
-    print(request.body)
     body = json.loads(sample_data)
     try:
         tag = body['tag']
         data = body['data']
+        if data["manuallyScheduled"]:
+            manually_scheduled = True
+        else:
+            manually_scheduled = False
+        print(manually_scheduled)
         sensorId = data["sensorID"]
         level_at_request = data["waterLevel"]
         try:
@@ -117,20 +122,17 @@ def delegate(request):
         sensor = Pad.objects.get(sensorId=int(sensorId))
         skill = Skill.objects.get(title=metric)
     except Pad.DoesNotExist:
-        print("Pad")
         return JsonResponse({"error": "No such sensor"})
     except Skill.DoesNotExist:
-        print("Skill")
         return JsonResponse({"error": "No such job type"})
     except KeyError:
-        print("Key")
         return JsonResponse({"error": "Key Error"})
     correct_user = None
     smallest = -1
     # for all users that can solve the task
-    task = Task.objects.create(pad=sensor, skill=skill, date=date, active=True, level_at_request=level_at_request, tank_capacity=100)
-    # appropriate skill, not an admin and exclude users with an active task
-    for user in Profile.objects.filter(skills=skill, admin=False).exclude(tasks__active=True):
+    task = Task.objects.create(pad=sensor, skill=skill, date=date, active=True, level_at_request=level_at_request, tank_capacity=100, manually_scheduled=manually_scheduled)
+    # appropriate skill, not an admin, space in truck and exclude users with an active task
+    for user in Profile.objects.filter(skills=skill, admin=False, truck_available_capacity__gte=level_at_request).exclude(tasks__active=True):
         location = user.current_location()
         distance = math.sqrt(math.pow(abs(sensor.location.lat-location.lat), 2) +
                              math.pow(abs(sensor.location.longitude-location.longitude), 2))
@@ -142,9 +144,13 @@ def delegate(request):
     else:  # Add task and create notification
         correct_user.tasks.add(task)
         correct_user.push_notification(title="New Task", body=metric+" at Sensor "+sensorId)
-    print(correct_user)
     task.save()
-    return JsonResponse({"result": "success", 'name': task.skill.name, 'date': task.date, 'taskId': task.pk})
+    # return data
+    try:
+        user = Profile.objects.get(user=request.user)
+        return JsonResponse({"users": user.get_my_workers(), "sensors": user.get_pads()})
+    except Profile.DoesNotExist:
+        return JsonResponse({"result": "success", 'name': task.skill.name, 'date': task.date, 'taskId': task.pk})
 
 
 '''
@@ -166,7 +172,8 @@ def get_totals_data(request):
     num_users = Profile.objects.filter(admin=False).count()
     user = Profile.objects.get(user=request.user)
     return JsonResponse({"numActive": active, "numDone": done, "numUsers": num_users, "timeChart": user.monthly_time_spent(),
-                         "waterHauled": user.monthly_volume_hauled(), "avgVolume": user.average_water_level_at_request()})
+                         "waterHauled": user.monthly_volume_hauled(), "avgVolume": user.average_water_level_at_request(),
+                         "manuallyScheduled": user.monthly_manually_scheduled()})
 
 
 def logout_view(request):
@@ -247,13 +254,18 @@ def init_2(request):
     skill = skill
     sensors = Pad.objects.all()
     users = Profile.objects.filter(admin=False)
-    for i in range(0, 30):
-        date = datetime.datetime(2017, randint(1, 2), randint(1, 23), randint(1, 20), randint(1, 55), randint(1, 55), tzinfo=pytz.utc)
+    for i in range(0, 100):
+        month = randint(1, 12)
+        year = 2016
+        if month < 3:
+            year = 2017
+        date = datetime.datetime(year, month, randint(1, 23), randint(1, 20), randint(1, 55), randint(1, 55), tzinfo=pytz.utc)
         hours = randint(1, 15)
         end_date = date+datetime.timedelta(hours=randint(hours+1, hours+10))+datetime.timedelta(minutes=randint(0,55))
         start_date = date+datetime.timedelta(hours=hours)
         level = randint(50, 100)
-        t1 = Task.objects.create(pad=sensors[randint(0, 16)], skill=skill, date=date, start_date=start_date,
+        manual = randint(0, 10) % 9 == 0
+        t1 = Task.objects.create(pad=sensors[randint(0, 16)], skill=skill, date=date, start_date=start_date, manually_scheduled=manual,
                                  datecompleted=end_date, active=False, level_at_request=level, tank_capacity=100, amount_hauled=100-level)
         user = users[randint(0, 2)]
         user.tasks.add(t1)

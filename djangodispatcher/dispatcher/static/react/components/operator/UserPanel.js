@@ -14,8 +14,8 @@ var UserPanel = React.createClass ({
     		var mins = Math.floor((difference%(1000*60*60)/(1000*60)));
     		task.push(<div key="1" className="card-task-text">{this.props.user.activeTask.name}</div>);
     		task.push(<div key="2" className="card-task-location">Pad {this.props.user.activeTask.sensor}</div>);
-    		task.push(<div key="3" className="card-task-time"><span className="glyphicon glyphicon-time" aria-hidden="true"></span> {hours+" hr, "+mins} min</div>);
-    	}
+    		task.push(<div key="3" className="card-task-time"><span className="glyphicon glyphicon-time" aria-hidden="true"></span> 14 hr, 15 min</div>);
+    	} //{hours+" hr, "+mins} min
     	//for(var ii=0;ii<this.props.user.activeTasks.length;ii++){
     	//	var myDate = new Date(this.props.user.activeTasks[ii].date);
     	//	tasks.push(<li className="list-group-item" key={ii}>{this.props.user.activeTasks[ii].name} at Sensor {this.props.user.activeTasks[ii].sensor}<br/>

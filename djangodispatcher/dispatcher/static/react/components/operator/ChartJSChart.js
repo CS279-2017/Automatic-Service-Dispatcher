@@ -26,24 +26,26 @@ var ChartJSChart = React.createClass({
                             scaleLabel: {
                                 display: true,
                                 labelString: newProps.yAxisLabel
-                            }
+                            },
+                            stacked: newProps.stacked
                         }],
                         xAxis : []
                     }
                 }
             };
             for(var ii = 0; ii<newProps.data.length; ii++){
+                var color_index = Math.round(light_colors.length*Math.random(0,1))
                 chartObj.data.datasets.push({
                     label: newProps.datasetLabel[ii],
                     fill: true,
                     lineTension: .01,
-                    backgroundColor: light_colors[ii],
-                    borderColor: med_colors[ii],
+                    backgroundColor: light_colors[color_index],
+                    borderColor: med_colors[color_index],
                     borderWidth: 1,
-                    pointBorderColor: med_colors[ii],
-                    pointBackgroundColor: med_colors[ii],
-                    pointHoverBackgroundColor: dark_colors[ii],
-                    pointHoverBorderColor: dark_colors[ii],
+                    pointBorderColor: med_colors[color_index],
+                    pointBackgroundColor: med_colors[color_index],
+                    pointHoverBackgroundColor: dark_colors[color_index],
+                    pointHoverBorderColor: dark_colors[color_index],
                     pointBorderWidth: 1,
                     pointHoverRadius: 3,
                     pointRadius: 1,
@@ -101,24 +103,26 @@ var ChartJSChart = React.createClass({
                             scaleLabel: {
                                 display: true,
                                 labelString: this.props.yAxisLabel
-                            }
+                            },
+                            stacked: this.props.stacked
                         }],
                         xAxis : []
                     }
                 }
             };
             for(var ii = 0; ii<this.props.data.length; ii++){
+                var color_index = Math.round(light_colors.length*Math.random(0,1))
                 chartObj.data.datasets.push({
                     label: this.props.datasetLabel[ii],
                     fill: true,
                     lineTension: .01,
-                    backgroundColor: light_colors[ii],
-                    borderColor: med_colors[ii],
+                    backgroundColor: light_colors[color_index],
+                    borderColor: med_colors[color_index],
                     borderWidth: 1,
-                    pointBorderColor: med_colors[ii],
-                    pointBackgroundColor: med_colors[ii],
-                    pointHoverBackgroundColor: dark_colors[ii],
-                    pointHoverBorderColor: dark_colors[ii],
+                    pointBorderColor: med_colors[color_index],
+                    pointBackgroundColor: med_colors[color_index],
+                    pointHoverBackgroundColor: dark_colors[color_index],
+                    pointHoverBorderColor: dark_colors[color_index],
                     pointBorderWidth: 1,
                     pointHoverRadius: 3,
                     pointRadius: 1,
@@ -146,6 +150,7 @@ var ChartJSChart = React.createClass({
                     beginAtZero: true   // minimum value will be 0.
                 };
             }
+
             var myProblemWorkordersChart = new Chart(ctxMyChart, chartObj);
         }
     },
