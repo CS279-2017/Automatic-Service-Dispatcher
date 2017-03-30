@@ -14,6 +14,7 @@ import datetime
 class Skill(models.Model):
     title = models.CharField(max_length=30, default="None")
     name = models.CharField(max_length=30, default="None")
+    wage_rate = models.DecimalField(max_digits=8, decimal_places=2, default=50)
 
     def __unicode__(self):
         return self.title
@@ -172,7 +173,8 @@ class Task(models.Model):
         return {'taskId': self.pk, 'name': self.skill.name, 'date': self.date,  'start_date': self.start_date, # 'workerId': self.worker.pk,
                 "sensor": self.pad.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen, "minutesOpen": minutes,
                 "lattitude": self.pad.location.lat, "longitude": self.pad.location.longitude,
-                "levelAtRequest": self.level_at_request, 'tankCapacity': self.tank_capacity}
+                "levelAtRequest": self.level_at_request, 'tankCapacity': self.tank_capacity,
+                "estimatedPrice": self.level_at_request*self.skill.wage_rate}
 
 
 class Pad(models.Model):

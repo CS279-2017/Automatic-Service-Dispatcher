@@ -17,6 +17,16 @@ var Map = React.createClass( {
         this.map.panTo(center);
     }
     this.removeAllMarkers();
+    var image = new google.maps.MarkerImage("/static/react/OilAndGas-PossibleLogov3.png", null, null, null, new google.maps.Size(20,30));
+    var goldStar = {
+        path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",//'M 125,5 155,90 245,90 175,145 200,230 125,180 50,230 75,145 5,90 95,90 z',
+        fillColor: '#ff0000',
+        fillOpacity: 0.8,
+        scale: 4,
+        strokeColor: '#ff0000',
+        strokeWeight: 5
+      };
+
     if(newProps.sensors!=undefined){
         for(var i=0;i<newProps.sensors.length;i++){
             var sensor = {lat: parseFloat(newProps.sensors[i].lat), lng: parseFloat(newProps.sensors[i].long)};
@@ -25,22 +35,22 @@ var Map = React.createClass( {
                 marker = new google.maps.Marker({
                   position: sensor,
                   map: this.map,
-                  icon: "https://maps.google.com/mapfiles/ms/micons/water.png"
-                  //label: "S"+newProps.sensors[i].sensor,
+                  animation: google.maps.Animation.DROP,
+                  icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
                 });
             } else if(newProps.sensors[i].state="pending_task"){
                 marker = new google.maps.Marker({
                   position: sensor,
                   map: this.map,
-                  icon: "https://maps.google.com/mapfiles/ms/micons/hotsprings.png"
-                  //label: "S"+newProps.sensors[i].sensor,
+                  animation: google.maps.Animation.DROP,
+                  icon: goldStar,
+                  //icon: image//"http://maps.google.com/mapfiles/ms/icons/red-dot.png"
                 });
             } else {
                 marker = new google.maps.Marker({
                   position: sensor,
                   map: this.map,
-                  icon: "https://maps.google.com/mapfiles/ms/micons/mechanic.png"
-                  //label: "S"+newProps.sensors[i].sensor,
+                  icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
                 });
             }
             var info = "<p>Pad "+newProps.sensors[i].sensor+"</p>";
@@ -62,7 +72,7 @@ var Map = React.createClass( {
                 marker = new google.maps.Marker({
                   position: sensor,
                   map: this.map,
-                  icon: "https://maps.google.com/mapfiles/ms/micons/truck.png"
+                  icon: image//"https://maps.google.com/mapfiles/ms/micons/truck.png"
                 });
                 infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+" currently has no tasks</p></br><p>Their tank is full</p>" });
             } else {
