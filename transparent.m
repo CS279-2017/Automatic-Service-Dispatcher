@@ -1,8 +1,14 @@
-I = imread('OilAndGas-PossibleLogov3.png');
-figure, image(I);
-%57, 58, 61
+I = imread('truck.png');
 R = I(:,:,1);
 G = I(:,:,2);
 B = I(:,:,3);
-alphamatrix = ~(R==57 & G==58 & B==61);
-imwrite(I, 'transparentlogo.png', 'Alpha', double(alphamatrix));
+%alphamatrix = ~(R==57 & G==58 & B==61);
+alphamatrix = (R==0 & G==162 & B==232);
+imwrite(I, 'truckblue.png', 'Alpha', double(alphamatrix));
+R(R==0) = 34;
+G(G==162) = 139;
+B(B==232) = 34;
+I(:,:,1) = R;
+I(:,:,2) = G;
+I(:,:,3) = B;
+imwrite(I, 'truckgreen.png', 'Alpha', double(alphamatrix));

@@ -65,7 +65,7 @@ class Profile(models.Model):
         return self.task_set.filter(active=True).count()
 
     def current_location(self):
-        recent = self.locations.order_by('time')
+        recent = self.locations.order_by('-time')
         return recent[0]
 
     def push_notification(self, title, body):
@@ -181,6 +181,8 @@ class Pad(models.Model):
     sensorId = models.CharField(max_length=50, default="0", unique=True)
     location = models.ForeignKey(Location)
     operator = models.ForeignKey(Profile)
+    water_capacity = models.DecimalField(max_digits=8, decimal_places=2, default=100)
+    water_level = models.DecimalField(max_digits=8, decimal_places=2, default=0)
 
     def get_state(self):
         if not self.task_set.filter(active=True):
@@ -198,7 +200,8 @@ class Pad(models.Model):
 
     def json(self):
         return {"sensor": self.sensorId, "lat": self.location.lat, "long": self.location.longitude, "locationId": self.location.pk,
-                "state": self.get_state(), "wells": self.get_wells()}
+                "state": self.get_state(), "wells": self.get_wells(), "waterCapacity": self.water_capacity,
+                "waterLevel": self.water_level}
 
 
 class Well(models.Model):

@@ -30,7 +30,7 @@ var ControlCenter = React.createClass({
         trends.push(<div className="col-md-4" key={2}><TaskTrend title="Total Tasks Done" number={this.props.numDone}/></div>);
         trends.push(<div className="col-md-4" key={3}><TaskTrend title="Total Tasks Pending" number={this.props.numActive}/></div>);
         trends.push(<div className="col-md-4" key={4}><TaskTrend title="Average Volume at Request" number={this.props.avgVolume}/></div>);
-        return(<div className="fluid-body col-md-12">
+        return(<div className="fluid-body col-md-12 no-padding">
                 <NavBar user={this.props.user}/>
                 <SideBar2/>
                   <div className="tab-content main-view">

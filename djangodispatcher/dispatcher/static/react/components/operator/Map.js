@@ -4,8 +4,6 @@ var Map = React.createClass( {
     },
   componentDidMount: function() {
     var nashville = {lat: 36.1627, lng: -86.7816};
-    //var nashville = {lat: parseFloat(this.props.user.lat), lng: parseFloat(this.props.user.long)};
-    console.log(nashville);
     this.map = new google.maps.Map(this.refs.map, {
       zoom: 11,
       center: nashville
@@ -17,47 +15,43 @@ var Map = React.createClass( {
         this.map.panTo(center);
     }
     this.removeAllMarkers();
-    var image = new google.maps.MarkerImage("/static/react/OilAndGas-PossibleLogov3.png", null, null, null, new google.maps.Size(20,30));
-    var goldStar = {
-        path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",//'M 125,5 155,90 245,90 175,145 200,230 125,180 50,230 75,145 5,90 95,90 z',
-        fillColor: '#ff0000',
-        fillOpacity: 0.8,
-        scale: 4,
-        strokeColor: '#ff0000',
-        strokeWeight: 5
-      };
-
+    var green = new google.maps.MarkerImage("/static/react/greeniconbubble.png", null, null, null, new google.maps.Size(30,50));
+    var yellow = new google.maps.MarkerImage("/static/react/yellowiconbubble.png", null, null, null, new google.maps.Size(30,50));
+    var red = new google.maps.MarkerImage("/static/react/rediconbubble.png", null, null, null, new google.maps.Size(30,50));
+    var truck = new google.maps.MarkerImage("/static/react/truckblue.png", null, null, null, new google.maps.Size(60,30));
+    var truckgreen = new google.maps.MarkerImage("/static/react/truckgreen.png", null, null, null, new google.maps.Size(60,30));
     if(newProps.sensors!=undefined){
         for(var i=0;i<newProps.sensors.length;i++){
             var sensor = {lat: parseFloat(newProps.sensors[i].lat), lng: parseFloat(newProps.sensors[i].long)};
-            var marker;
-            if(newProps.sensors[i].state=="clear"){
-                marker = new google.maps.Marker({
+            var marker = new google.maps.Marker({
                   position: sensor,
                   map: this.map,
                   animation: google.maps.Animation.DROP,
-                  icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
                 });
-            } else if(newProps.sensors[i].state="pending_task"){
-                marker = new google.maps.Marker({
-                  position: sensor,
-                  map: this.map,
-                  animation: google.maps.Animation.DROP,
-                  icon: goldStar,
-                  //icon: image//"http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-                });
-            } else {
-                marker = new google.maps.Marker({
-                  position: sensor,
-                  map: this.map,
-                  icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
-                });
-            }
             var info = "<p>Pad "+newProps.sensors[i].sensor+"</p>";
-            for(var j = 0; j<newProps.sensors[i].wells.length;j++){
-                var well = newProps.sensors[i].wells[j];
-                info += "</br><p>Well "+(j+1)+": "+100*well.level/well.capacity+"% Full</p>"
+            info += "<p>"+newProps.sensors[i].waterLevel+" of "+newProps.sensors[i].waterCapacity+"</p>"
+            if(newProps.sensors[i].state=="clear"){
+                info += "<p>There are no workers needed</p>";
+            } else if(newProps.sensors[i].state="pending_task"){
+                info += "<p>Waiting for a worker to accept the haul</p>";
+            } else {
+                info += "<p>A worker is on their way</p>";
             }
+            var ratio = newProps.sensors[i].waterLevel/newProps.sensors[i].waterCapacity;
+            if(ratio < .45){
+                //marker.setIcon("http://maps.google.com/mapfiles/ms/icons/green-dot.png",);
+                marker.setIcon(green);
+            } else if(ratio < .70){
+                //marker.setIcon('http://maps.google.com/mapfiles/ms/icons/yellow-dot.png');
+                marker.setIcon(yellow);
+            } else {
+                //marker.setIcon("http://maps.google.com/mapfiles/ms/icons/red-dot.png");
+                marker.setIcon(red);
+            }
+            //for(var j = 0; j<newProps.sensors[i].wells.length;j++){
+            //    var well = newProps.sensors[i].wells[j];
+            //    info += "</br><p>Well "+(j+1)+": "+100*well.level/well.capacity+"% Full</p>"
+           // }
             var infowindow = new google.maps.InfoWindow({ content: info });
             this.bindInfoWindow(marker, this.map, infowindow)
             this.state.sensorMarkers.push(marker)
@@ -72,14 +66,15 @@ var Map = React.createClass( {
                 marker = new google.maps.Marker({
                   position: sensor,
                   map: this.map,
-                  icon: image//"https://maps.google.com/mapfiles/ms/micons/truck.png"
+                  icon: truck, //image//"https://maps.google.com/mapfiles/ms/micons/truck.png"
                 });
-                infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+" currently has no tasks</p></br><p>Their tank is full</p>" });
+                infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+
+                " currently has no tasks</p></br><p>Their tank has room for "+ newProps.users[i].truckAvailableCapacity+" barrels</p>" });
             } else {
                 marker = new google.maps.Marker({
                   position: sensor,
                   map: this.map,
-                  icon: "http://maps.google.com/mapfiles/kml/pal4/icon15.png"
+                  icon: truckgreen, //"http://maps.google.com/mapfiles/kml/pal4/icon15.png"
                 });
                 var myDate = new Date(newProps.users[i].activeTask.start_date);
                 infowindow = new google.maps.InfoWindow({ content: "<p>"+newProps.users[i].firstName+" started a new task at "+myDate+"</p></br><p>They are headed to Pad "+newProps.users[i].activeTask.sensor+"</p>" });
@@ -108,7 +103,7 @@ var Map = React.createClass( {
 
     return (
       <div className="text-center">
-        <div ref="map" style={mapStyle} >I should be a map!</div>
+        <div ref="map" style={mapStyle}>I should be a map!</div>
       </div>
     );
   }
