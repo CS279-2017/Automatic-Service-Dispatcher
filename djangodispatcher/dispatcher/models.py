@@ -99,8 +99,33 @@ class Profile(models.Model):
             pads.append(pad.json())
         return pads
 
-    # data methods for operators
+    # methods for massive data retireval
+    def location_list(self):
+        locations = []
+        for loc in self.locations.all():
+            locations.append({"lat": loc.lat, "longitude": loc.longitude, "time": loc.timestamp, "serverKey": loc.pk})
+        return locations
 
+    def skill_list(self):
+        skills = []
+        for skill in self.skills.all():
+            skills.append({"name": skill.name, "title": skill.title, "wageRate": skill.wage_rate, "serverKey": skill.pk})
+        return skills
+
+    def task_list(self):
+        tasks = []
+        for task in self.tasks.all():
+            locations = [{"lat": task.location.lat, "longitude": task.location.longitude,
+                          "time": task.location.timestamp, "serverKey": task.location.pk}]
+            pads = [{"sensorID": task.pad.sensorId, "serverKey": task.pad.pk,
+                     "locationList": locations, "wellList": task.pad.get_wells()}]
+            skills = [{"name": task.skill.name, "title": task.skill.title, "wageRate": task.skill.wage_rate, "serverKey": task.skill.pk}]
+            tasks.append({"levelAtRequest": task.level_at_request, "tankCapacity": task.tank_capacity, "date": task.date,
+                          "startDate": task.start_date, "dateCompleted": task.datecompleted, "active": task.active,
+                          "amountHauled": task.amount_hauled, "serverKey": task.pk, "padList": pads, "skillList": skills})
+        return tasks
+
+    # data methods for operators
     def average_water_level_at_request(self):
         return Task.objects.filter(pad__operator=self).aggregate(Avg('level_at_request'))['level_at_request__avg']
 
@@ -210,4 +235,4 @@ class Well(models.Model):
     water_level = models.DecimalField(max_digits=8, decimal_places=2)
 
     def json(self):
-        return {"capacity": self.water_capacity, "level": self.water_level}
+        return {"waterCapacity": self.water_capacity, "waterLevel": self.water_level, "serverKey": self.pk}

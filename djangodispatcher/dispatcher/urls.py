@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from .views import website_views, android_views
+from .views import website_views, android_views, rest_views
 
 urlpatterns = [
     url(r'^$', website_views.index, name='index'),
@@ -39,4 +39,5 @@ urlpatterns = [
     url(r'^api/create_task/$', website_views.create_sample_task, name='create task'),
 
 
+    url(r'^api/android/all_data/$', rest_views.retrieve_all_data, name='get_all_data'),
 ]
