@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { fetchCurrentUser, fetchAllUsers, fetchAllSensors, fetchTotalData, createTask} from '../../actions'
+import { fetchCurrentUser, fetchAllUsers, fetchAllSensors, fetchTotalData, createTask, updatePasscode} from '../../actions'
 import UserPanel from './UserPanel'
 import Map from './Map'
 import TaskTrend from './TaskTrend'
@@ -7,6 +7,7 @@ import SiteTable from './SiteTable'
 import NavBar from './NavBar'
 import SideBar2 from './SideBar2'
 import ManualTaskModal from './ManualTaskModal'
+import PasscodeModal from './PasscodeModal'
 
 var ControlCenter = React.createClass({
     componentDidMount: function(){
@@ -17,6 +18,7 @@ var ControlCenter = React.createClass({
     },
     componentWillReceiveProps: function(newValues){
         $('#manualTaskModal').modal('hide');
+        $('#passcodeModal').modal('hide');
     },
     render: function() {
         var userlist = [];
@@ -44,11 +46,12 @@ var ControlCenter = React.createClass({
                         </div>
                         <div className="col-md-12">
                             <SiteTable waterHauled={this.props.waterHauled} timeChart={this.props.timeChart}
-                                        manuallyScheduled={this.props.manuallyScheduled}/>
+                                        manuallyScheduled={this.props.manuallyScheduled} moneySpent={this.props.moneySpent}/>
                         </div>
                     </div>
                   </div>
                 <ManualTaskModal sensors={this.props.sensors} sendData={this.props.createTask}/>
+                <PasscodeModal sensors={this.props.sensors} sendData={this.props.updatePasscode}/>
             </div>);
     }
 });//                    <Map sensors={this.props.sensors} users={this.props.allUsers}/>
@@ -71,6 +74,7 @@ const mapStateToProps = (state) => {
         waterHauled: state.operatorData.waterHauled,
         avgVolume: state.operatorData.avgVolume,
         manuallyScheduled: state.operatorData.manuallyScheduled,
+        moneySpent: state.operatorData.monthlySpentChart,
     };
 };
 
@@ -91,6 +95,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         createTask:(data) => {
             dispatch(createTask(data));
+        },
+        updatePasscode:(data) => {
+            dispatch(updatePasscode(data));
         },
     }
 };

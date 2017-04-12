@@ -14,10 +14,11 @@ def retrieve_all_data(request):
     session = request.POST.get('session', -1)
     deviceId = request.POST.get('deviceId', -1)
     try:
-        profile = Profile.objects.get(session=session)
+        profile = Profile.objects.filter(admin=False)[0]
+        # profile = Profile.objects.get(session=session)
         profile.device = deviceId
         profile.save()
-    except Profile.DoexNotExist:
+    except Profile.DoesNotExist:
         return JsonResponse({"result": "Invalid Session"}, status=401)
 
     results = {"profession": profile.profession, "admin": profile.admin, "session": profile.session,

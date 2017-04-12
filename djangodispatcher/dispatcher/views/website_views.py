@@ -90,6 +90,20 @@ def complete_task(request):
     except Task.DoesNotExist:
         return JsonResponse({"result": "error"})
 
+'''
+{sensorID: sensor, passcode: passcode}
+'''
+@login_required
+def update_passcode(request):
+    try:
+        sensor = Pad.objects.get(sensorId=int(request.POST.get("sensorID", -1)))
+        sensor.passcode = request.POST.get("passcode")
+        sensor.save()
+    except (ValueError, Pad.DoesNotExist):
+        return JsonResponse({"error": "Key Error"})
+    user = Profile.objects.get(user=request.user)
+    return JsonResponse({"sensors": user.get_pads()})
+
 ''''
 {tag: { metric: skill needed},
 data: {sensorID; sensorID,
@@ -173,7 +187,7 @@ def get_totals_data(request):
     user = Profile.objects.get(user=request.user)
     return JsonResponse({"numActive": active, "numDone": done, "numUsers": num_users, "timeChart": user.monthly_time_spent(),
                          "waterHauled": user.monthly_volume_hauled(), "avgVolume": user.average_water_level_at_request(),
-                         "manuallyScheduled": user.monthly_manually_scheduled()})
+                         "manuallyScheduled": user.monthly_manually_scheduled(), "monthlySpentChart": user.total_spent_on_water_hauling()})
 
 
 def logout_view(request):
@@ -274,7 +288,7 @@ def init_2(request):
         user.save()
     # most recent location
     for user in users:
-        loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-0.5, 0.5)), longitude=location.longitude+decimal.Decimal(uniform(-0.5, 0.5)))
+        loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-0.1, 0.1)), longitude=location.longitude+decimal.Decimal(uniform(-0.1, 0.1)))
         user.locations.add(loc1)
         user.save()
     # for i in range(0, 10):

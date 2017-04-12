@@ -2,6 +2,9 @@ var NavBar = React.createClass ({
     showModal: function(){
       $('#manualTaskModal').modal('show');
     },
+    showPasscodeModal: function(){
+      $('#passcodeModal').modal('show');
+    },
     render: function() {
 		return(<nav className="navbar navbar-inverse navbar-fixed-top navbar-grey">
   <div className="container-fluid">
@@ -15,6 +18,7 @@ var NavBar = React.createClass ({
     </div>
       <ul className="nav navbar-nav navbar-right">
         <li><a onClick={this.showModal}>Schedule Task</a></li>
+         <li><a onClick={this.showPasscodeModal}>Update Passcode</a></li>
         <li><a href="#">{this.props.user.firstName+" "+this.props.user.lastName}</a></li>
         <li><a href="/accounts/logout/">Logout</a></li>
       </ul>

@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^api/finishtask', website_views.complete_task, name='complete_task'),
 
     url(r'^api/delegate', website_views.delegate, name='delegate'),
+    url(r'^api/update_passcode', website_views.update_passcode, name='update_passcode'),
 
     url(r'^api/allusers', website_views.get_all_workers, name='all_workers'),
     url(r'^api/sensors', website_views.get_all_sensors, name='all_sensors'),

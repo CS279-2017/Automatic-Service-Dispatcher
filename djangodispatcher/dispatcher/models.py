@@ -103,7 +103,7 @@ class Profile(models.Model):
     def location_list(self):
         locations = []
         for loc in self.locations.all():
-            locations.append({"lat": loc.lat, "longitude": loc.longitude, "time": loc.timestamp, "serverKey": loc.pk})
+            locations.append({"lat": loc.lat, "longitude": loc.longitude, "time": loc.time, "serverKey": loc.pk})
         return locations
 
     def skill_list(self):
@@ -115,8 +115,9 @@ class Profile(models.Model):
     def task_list(self):
         tasks = []
         for task in self.tasks.all():
-            locations = [{"lat": task.location.lat, "longitude": task.location.longitude,
-                          "time": task.location.timestamp, "serverKey": task.location.pk}]
+            location = task.pad.location
+            locations = [{"lat": location.lat, "longitude": location.longitude,
+                          "time": location.time, "serverKey": location.pk}]
             pads = [{"sensorID": task.pad.sensorId, "serverKey": task.pad.pk,
                      "locationList": locations, "wellList": task.pad.get_wells()}]
             skills = [{"name": task.skill.name, "title": task.skill.title, "wageRate": task.skill.wage_rate, "serverKey": task.skill.pk}]
@@ -129,6 +130,7 @@ class Profile(models.Model):
     def average_water_level_at_request(self):
         return Task.objects.filter(pad__operator=self).aggregate(Avg('level_at_request'))['level_at_request__avg']
 
+    # not using
     def monthly_time_spent(self):
         months = []
         times = []
@@ -163,6 +165,17 @@ class Profile(models.Model):
             not_manually_scheduled = Task.objects.filter(start_date__month=i, manually_scheduled=False).count()
             not_manual.append(not_manually_scheduled)
         return {"months": months, "manual": manual, "notManual": not_manual}
+
+    def total_spent_on_water_hauling(self):
+        months = []
+        prices = []
+        for i in range(1, 13):
+            months.append(datetime.date(1900, i, 1).strftime('%B'))
+            cumulative = 0
+            for task in Task.objects.filter(start_date__month=i, active=False):
+                cumulative += task.skill.wage_rate*task.amount_hauled
+            prices.append(cumulative)
+        return {"months": months, "cumulativeMoney": prices}
 
 
 class Task(models.Model):
@@ -204,17 +217,14 @@ class Task(models.Model):
 
 class Pad(models.Model):
     sensorId = models.CharField(max_length=50, default="0", unique=True)
+    passcode = models.CharField(max_length=10, default="0")
     location = models.ForeignKey(Location)
     operator = models.ForeignKey(Profile)
     water_capacity = models.DecimalField(max_digits=8, decimal_places=2, default=100)
     water_level = models.DecimalField(max_digits=8, decimal_places=2, default=0)
 
     def get_state(self):
-        if not self.task_set.filter(active=True):
-            return "clear"
-        elif self.task_set.filter(active=True, profile__isnull=True):
-            return "pending_task"
-        else:
+        if self.task_set.filter(start_date__isnull=True, active=True):
             return "being_fixed"
 
     def get_wells(self):
@@ -226,7 +236,7 @@ class Pad(models.Model):
     def json(self):
         return {"sensor": self.sensorId, "lat": self.location.lat, "long": self.location.longitude, "locationId": self.location.pk,
                 "state": self.get_state(), "wells": self.get_wells(), "waterCapacity": self.water_capacity,
-                "waterLevel": self.water_level}
+                "waterLevel": self.water_level, "passcode": self.passcode}
 
 
 class Well(models.Model):

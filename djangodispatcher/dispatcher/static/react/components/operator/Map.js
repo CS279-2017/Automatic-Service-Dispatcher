@@ -18,6 +18,7 @@ var Map = React.createClass( {
     var green = new google.maps.MarkerImage("/static/react/greeniconbubble.png", null, null, null, new google.maps.Size(30,50));
     var yellow = new google.maps.MarkerImage("/static/react/yellowiconbubble.png", null, null, null, new google.maps.Size(30,50));
     var red = new google.maps.MarkerImage("/static/react/rediconbubble.png", null, null, null, new google.maps.Size(30,50));
+    var redaccepted = new google.maps.MarkerImage("/static/react/rediconbubbleoutline.png", null, null, null, new google.maps.Size(30,50));
     var truck = new google.maps.MarkerImage("/static/react/truckblue.png", null, null, null, new google.maps.Size(60,30));
     var truckgreen = new google.maps.MarkerImage("/static/react/truckgreen.png", null, null, null, new google.maps.Size(60,30));
     if(newProps.sensors!=undefined){
@@ -30,23 +31,23 @@ var Map = React.createClass( {
                 });
             var info = "<p>Pad "+newProps.sensors[i].sensor+"</p>";
             info += "<p>"+newProps.sensors[i].waterLevel+" of "+newProps.sensors[i].waterCapacity+"</p>"
-            if(newProps.sensors[i].state=="clear"){
-                info += "<p>There are no workers needed</p>";
-            } else if(newProps.sensors[i].state="pending_task"){
-                info += "<p>Waiting for a worker to accept the haul</p>";
-            } else {
-                info += "<p>A worker is on their way</p>";
-            }
             var ratio = newProps.sensors[i].waterLevel/newProps.sensors[i].waterCapacity;
             if(ratio < .45){
                 //marker.setIcon("http://maps.google.com/mapfiles/ms/icons/green-dot.png",);
                 marker.setIcon(green);
+                info += "<p>There are no workers needed</p>";
             } else if(ratio < .70){
                 //marker.setIcon('http://maps.google.com/mapfiles/ms/icons/yellow-dot.png');
                 marker.setIcon(yellow);
+                info += "<p>There are no workers needed</p>";
             } else {
-                //marker.setIcon("http://maps.google.com/mapfiles/ms/icons/red-dot.png");
-                marker.setIcon(red);
+                if(newProps.sensors[i].state=="being_fixed"){
+                    marker.setIcon(redaccepted);
+                    info += "<p>A worker is on their way</p>";
+                } else {
+                    marker.setIcon(red);
+                    info += "<p>Waiting for a worker to accept the haul</p>";
+                }
             }
             //for(var j = 0; j<newProps.sensors[i].wells.length;j++){
             //    var well = newProps.sensors[i].wells[j];

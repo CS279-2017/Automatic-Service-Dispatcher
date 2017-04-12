@@ -20,6 +20,11 @@ var SiteTable = React.createClass ({
 			 data={[this.props.waterHauled.volume]} width="6"
 			 chartTitle={'Water Hauled Per Month'} xAxisLabel={'Month'}
 			 monthChart={false} yAxisLabel={'Volume Hauled'} stacked={false}/>
+		<ChartJSChart chartId="moneyChart" labels={this.props.moneySpent.months}
+			 chartType={'bar'} datasetLabel={["Money Spent"]}
+			 data={[this.props.moneySpent.cumulativeMoney]} width="6"
+			 chartTitle={'Money Spent on Hauling each Month'} xAxisLabel={'Month'}
+			 monthChart={false} yAxisLabel={"Money Spent"} stacked={false}/>
 		<ChartJSChart chartId="manualChart" labels={this.props.manuallyScheduled.months}
 			 chartType={'bar'} datasetLabel={["Not Manual", "Manual"]}
 			 data={[this.props.manuallyScheduled.notManual, this.props.manuallyScheduled.manual]} width="6"
