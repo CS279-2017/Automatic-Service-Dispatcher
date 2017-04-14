@@ -28,9 +28,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by gpettet on 2017-02-23.
+ *
+ * This Fragment displays a user's Profile information
  */
 
-public class SettingsFragment extends Fragment {
+public class ProfileFragment extends Fragment {
     private TextView mFirstName;
     private TextView mLastName;
     private TextView mEmail;

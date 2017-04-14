@@ -6,15 +6,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.ListFragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -23,7 +19,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import retrofit2.Call;
@@ -31,7 +26,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import vanderbilt.cs279.org.dispatchmobile.R;
 
 public class NavDrawAct extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -197,8 +191,8 @@ public class NavDrawAct extends AppCompatActivity
             changeActiveFragment(new CompletedTaskListFrag());
             //Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
             //toast.show();
-        } else if (id == R.id.nav_settings) {
-            changeActiveFragment(new SettingsFragment());
+        } else if (id == R.id.nav_profile) {
+            changeActiveFragment(new ProfileFragment());
             /*Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
             toast.show();
 
