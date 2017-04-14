@@ -14,6 +14,7 @@ import datetime
 class Skill(models.Model):
     title = models.CharField(max_length=30, default="None")
     name = models.CharField(max_length=30, default="None")
+    wage_rate = models.DecimalField(max_digits=8, decimal_places=2, default=50)
 
     def __unicode__(self):
         return self.title
@@ -64,7 +65,7 @@ class Profile(models.Model):
         return self.task_set.filter(active=True).count()
 
     def current_location(self):
-        recent = self.locations.order_by('time')
+        recent = self.locations.order_by('-time')
         return recent[0]
 
     def push_notification(self, title, body):
@@ -98,11 +99,38 @@ class Profile(models.Model):
             pads.append(pad.json())
         return pads
 
-    # data methods for operators
+    # methods for massive data retireval
+    def location_list(self):
+        locations = []
+        for loc in self.locations.all():
+            locations.append({"lat": loc.lat, "longitude": loc.longitude, "time": loc.time, "serverKey": loc.pk})
+        return locations
 
+    def skill_list(self):
+        skills = []
+        for skill in self.skills.all():
+            skills.append({"name": skill.name, "title": skill.title, "wageRate": skill.wage_rate, "serverKey": skill.pk})
+        return skills
+
+    def task_list(self):
+        tasks = []
+        for task in self.tasks.all():
+            location = task.pad.location
+            locations = [{"lat": location.lat, "longitude": location.longitude,
+                          "time": location.time, "serverKey": location.pk}]
+            pads = [{"sensorID": task.pad.sensorId, "serverKey": task.pad.pk,
+                     "locationList": locations, "wellList": task.pad.get_wells()}]
+            skills = [{"name": task.skill.name, "title": task.skill.title, "wageRate": task.skill.wage_rate, "serverKey": task.skill.pk}]
+            tasks.append({"levelAtRequest": task.level_at_request, "tankCapacity": task.tank_capacity, "date": task.date,
+                          "startDate": task.start_date, "dateCompleted": task.datecompleted, "active": task.active,
+                          "amountHauled": task.amount_hauled, "serverKey": task.pk, "padList": pads, "skillList": skills})
+        return tasks
+
+    # data methods for operators
     def average_water_level_at_request(self):
         return Task.objects.filter(pad__operator=self).aggregate(Avg('level_at_request'))['level_at_request__avg']
 
+    # not using
     def monthly_time_spent(self):
         months = []
         times = []
@@ -138,6 +166,17 @@ class Profile(models.Model):
             not_manual.append(not_manually_scheduled)
         return {"months": months, "manual": manual, "notManual": not_manual}
 
+    def total_spent_on_water_hauling(self):
+        months = []
+        prices = []
+        for i in range(1, 13):
+            months.append(datetime.date(1900, i, 1).strftime('%B'))
+            cumulative = 0
+            for task in Task.objects.filter(start_date__month=i, active=False):
+                cumulative += task.skill.wage_rate*task.amount_hauled
+            prices.append(cumulative)
+        return {"months": months, "cumulativeMoney": prices}
+
 
 class Task(models.Model):
     declined_workers = models.ManyToManyField(Profile, blank=True)
@@ -172,20 +211,20 @@ class Task(models.Model):
         return {'taskId': self.pk, 'name': self.skill.name, 'date': self.date,  'start_date': self.start_date, # 'workerId': self.worker.pk,
                 "sensor": self.pad.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen, "minutesOpen": minutes,
                 "lattitude": self.pad.location.lat, "longitude": self.pad.location.longitude,
-                "levelAtRequest": self.level_at_request, 'tankCapacity': self.tank_capacity}
+                "levelAtRequest": self.level_at_request, 'tankCapacity': self.tank_capacity,
+                "estimatedPrice": self.level_at_request*self.skill.wage_rate}
 
 
 class Pad(models.Model):
     sensorId = models.CharField(max_length=50, default="0", unique=True)
+    passcode = models.CharField(max_length=10, default="0")
     location = models.ForeignKey(Location)
     operator = models.ForeignKey(Profile)
+    water_capacity = models.DecimalField(max_digits=8, decimal_places=2, default=100)
+    water_level = models.DecimalField(max_digits=8, decimal_places=2, default=0)
 
     def get_state(self):
-        if not self.task_set.filter(active=True):
-            return "clear"
-        elif self.task_set.filter(active=True, profile__isnull=True):
-            return "pending_task"
-        else:
+        if self.task_set.filter(start_date__isnull=True, active=True):
             return "being_fixed"
 
     def get_wells(self):
@@ -196,7 +235,8 @@ class Pad(models.Model):
 
     def json(self):
         return {"sensor": self.sensorId, "lat": self.location.lat, "long": self.location.longitude, "locationId": self.location.pk,
-                "state": self.get_state(), "wells": self.get_wells()}
+                "state": self.get_state(), "wells": self.get_wells(), "waterCapacity": self.water_capacity,
+                "waterLevel": self.water_level, "passcode": self.passcode}
 
 
 class Well(models.Model):
@@ -205,4 +245,4 @@ class Well(models.Model):
     water_level = models.DecimalField(max_digits=8, decimal_places=2)
 
     def json(self):
-        return {"capacity": self.water_capacity, "level": self.water_level}
+        return {"waterCapacity": self.water_capacity, "waterLevel": self.water_level, "serverKey": self.pk}

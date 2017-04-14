@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from .views import website_views, android_views
+from .views import website_views, android_views, rest_views
 
 urlpatterns = [
     url(r'^$', website_views.index, name='index'),
@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^api/finishtask', website_views.complete_task, name='complete_task'),
 
     url(r'^api/delegate', website_views.delegate, name='delegate'),
+    url(r'^api/update_passcode', website_views.update_passcode, name='update_passcode'),
 
     url(r'^api/allusers', website_views.get_all_workers, name='all_workers'),
     url(r'^api/sensors', website_views.get_all_sensors, name='all_sensors'),
@@ -39,4 +40,5 @@ urlpatterns = [
     url(r'^api/create_task/$', website_views.create_sample_task, name='create task'),
 
 
+    url(r'^api/android/all_data/$', rest_views.retrieve_all_data, name='get_all_data'),
 ]

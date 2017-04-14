@@ -7,6 +7,25 @@ from dispatcher.models import Task, Profile, Location, Skill
 
 from django.utils import timezone
 import datetime, urllib, base64
+
+
+@csrf_exempt
+def retrieve_all_data(request):
+    session = request.POST.get('session', -1)
+    deviceId = request.POST.get('deviceId', -1)
+    try:
+        profile = Profile.objects.filter(admin=False)[0]
+        # profile = Profile.objects.get(session=session)
+        profile.device = deviceId
+        profile.save()
+    except Profile.DoesNotExist:
+        return JsonResponse({"result": "Invalid Session"}, status=401)
+
+    results = {"profession": profile.profession, "admin": profile.admin, "session": profile.session,
+               "device": profile.device, "serverKey": profile.pk, "locationList": profile.location_list(),
+               "skillList": profile.skill_list(), "taskList": profile.task_list()}
+    return JsonResponse(results)
+
 '''
 Method for skills
 Params:

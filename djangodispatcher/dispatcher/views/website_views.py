@@ -90,6 +90,20 @@ def complete_task(request):
     except Task.DoesNotExist:
         return JsonResponse({"result": "error"})
 
+'''
+{sensorID: sensor, passcode: passcode}
+'''
+@login_required
+def update_passcode(request):
+    try:
+        sensor = Pad.objects.get(sensorId=int(request.POST.get("sensorID", -1)))
+        sensor.passcode = request.POST.get("passcode")
+        sensor.save()
+    except (ValueError, Pad.DoesNotExist):
+        return JsonResponse({"error": "Key Error"})
+    user = Profile.objects.get(user=request.user)
+    return JsonResponse({"sensors": user.get_pads()})
+
 ''''
 {tag: { metric: skill needed},
 data: {sensorID; sensorID,
@@ -173,7 +187,7 @@ def get_totals_data(request):
     user = Profile.objects.get(user=request.user)
     return JsonResponse({"numActive": active, "numDone": done, "numUsers": num_users, "timeChart": user.monthly_time_spent(),
                          "waterHauled": user.monthly_volume_hauled(), "avgVolume": user.average_water_level_at_request(),
-                         "manuallyScheduled": user.monthly_manually_scheduled()})
+                         "manuallyScheduled": user.monthly_manually_scheduled(), "monthlySpentChart": user.total_spent_on_water_hauling()})
 
 
 def logout_view(request):
@@ -220,7 +234,7 @@ def init_2(request):
             ad.save()
 
         location = Location.objects.create(lat=decimal.Decimal(sheet['G'+str(i)].value), longitude=decimal.Decimal(sheet['H'+str(i)].value))
-        s = Pad.objects.create(sensorId=sheet['L'+str(i)].value, location=location, operator=ad)
+        s = Pad.objects.create(sensorId=sheet['L'+str(i)].value, location=location, operator=ad, water_capacity=100, water_level=randint(0, 70))
         for j in range(0, int(sheet['I'+str(i)].value)):
             Well.objects.create(pad=s, water_capacity=100, water_level=100)
 
@@ -230,24 +244,24 @@ def init_2(request):
                                   last_name="Hauler")
     p1 = Profile.objects.create(user=u1, profession="Water Hauler", admin=False)
     p1.skills.add(skill)
-    loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
-    p1.locations.add(loc1)
+    # loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
+    #p1.locations.add(loc1)
     p1.save()
 
     u2 = User.objects.create_user(username="wh2", email="wh2@glow.com", password="engineering", first_name="Water",
                                   last_name="Driver")
     p2 = Profile.objects.create(user=u2, profession="Water Hauler", admin=False)
     p2.skills.add(skill)
-    loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
-    p2.locations.add(loc1)
+    # loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
+    #p2.locations.add(loc1)
     p2.save()
 
     u3 = User.objects.create_user(username="wh3", email="wh3@glow.com", password="engineering", first_name="Water",
                                   last_name="Filler")
     p3 = Profile.objects.create(user=u3, profession="Mechanic", admin=False)
     p3.skills.add(skill)
-    loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
-    p3.locations.add(loc1)
+    # loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
+    #p3.locations.add(loc1)
     p3.save()
 
     # create past tasks
@@ -269,18 +283,23 @@ def init_2(request):
                                  datecompleted=end_date, active=False, level_at_request=level, tank_capacity=100, amount_hauled=100-level)
         user = users[randint(0, 2)]
         user.tasks.add(t1)
-        user.locations.add(t1.pad.location)
+        loc1 = Location.objects.create(lat=t1.pad.location.lat, longitude=t1.pad.location.longitude, time=end_date)
+        user.locations.add(loc1)
         user.save()
     # most recent location
     for user in users:
-        loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-1, 1)), longitude=location.longitude+decimal.Decimal(uniform(-1, 1)))
+        loc1 = Location.objects.create(lat=location.lat+decimal.Decimal(uniform(-0.1, 0.1)), longitude=location.longitude+decimal.Decimal(uniform(-0.1, 0.1)))
         user.locations.add(loc1)
         user.save()
     # for i in range(0, 10):
+    # new tasks
     date = datetime.datetime(2017, datetime.date.today().month, datetime.date.today().day, randint(1, 20), randint(1, 55), randint(1, 55), tzinfo=pytz.utc)
-    level = randint(50, 100)
+    level = randint(71, 100)
     t1 = Task.objects.create(pad=sensors[randint(0, 16)], skill=skill, date=date, active=True, level_at_request=level,
                              tank_capacity=100)
+    pad = t1.pad
+    pad.water_level = level
+    pad.save()
     users[0].tasks.add(t1)
     users[0].save()
     # t1.possible_workers.add(users[0])
