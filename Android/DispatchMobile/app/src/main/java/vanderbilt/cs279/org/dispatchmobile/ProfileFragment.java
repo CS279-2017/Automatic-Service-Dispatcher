@@ -33,6 +33,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class ProfileFragment extends Fragment {
+
+    // User State
     private TextView mFirstName;
     private TextView mLastName;
     private TextView mEmail;
@@ -40,17 +42,35 @@ public class ProfileFragment extends Fragment {
     private TextView mSkills;
     private ImageView mProfileImage;
 
+    // Shared Preferences key used to store the user's session id
     private static final String mPREFERENCES = "GlowPrefs";
-    private static final String mSessionId = "sessionKey";
-    private static final String mDeviceId = "deviceId";
 
+    // the user's session id
+    private static final String mSessionId = "sessionKey";
+
+    // POJO containing the user's information
     UserInformation mUser;
+
+    // The user's skill set
     Set<String> mSkillsSet;
 
+    // Shared preferences object that is used to access the app's global sessionId
     SharedPreferences mSharedPreferences;
+
+    // The retrofit object that is used for communication with the server
     Retrofit retrofit;
+
+    // This apps specific retrofit api
     GlowAPI glowAPI;
 
+    /**
+     * Internal Android method, called when this fragment is created. Inflates and
+     * returns the view to display to the user.
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_user_profile, container, false);
@@ -59,6 +79,12 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Internal Android method, called after the view is inflated. Initializes this fragment's
+     * non-view state.
+     * @param view
+     * @param savedInstanceState
+     */
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -77,6 +103,9 @@ public class ProfileFragment extends Fragment {
         glowAPI = retrofit.create(GlowAPI.class);
     }
 
+    /**
+     * Android lifecycle method called each time the fragment is unpaused
+     */
     @Override
     public void onResume() {
         super.onResume();  // Always call the superclass method first
@@ -86,9 +115,21 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Updates the fragment's user information state from the server.
+     * @param session
+     */
     private void getUser(String session){
         Call<UserInformation> call = glowAPI.getUserInfo(session);
         call.enqueue(new Callback<UserInformation>() {
+
+            /**
+             * Callback method invoked when the server request for user information
+             * returns successfully. Updates the fragment's state using the information
+             * returned from the call (encoded in the UserInformation object via Retrofit)
+             * @param call
+             * @param response
+             */
             @Override
             public void onResponse(Call<UserInformation> call, Response<UserInformation> response) {
                 if (response.isSuccessful()) {
@@ -101,9 +142,16 @@ public class ProfileFragment extends Fragment {
                     mProfession.setText(mUser.profession);
                     new DownloadImageTask(mProfileImage).execute("https://www.gravatar.com/avatar/"+mUser.emailHash+"?d=identicon&s=600");
                 } else {
+                    // Session was invalid. Relogin
                     openLoginView();
                 }
             }
+
+            /**
+             * Callback method invoked if the server request fails.
+             * @param call
+             * @param t
+             */
             @Override
             public void onFailure(Call<UserInformation> call, Throwable t) {
                 Log.e("Error", t.getMessage());
@@ -111,6 +159,9 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    /**
+     * Navigates the user to the login view. To be used if user needs to re-login
+     */
     private void openLoginView(){
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString(mSessionId, "N/A");
@@ -121,11 +172,17 @@ public class ProfileFragment extends Fragment {
         startActivity(myIntent);
     }
 
+    /**
+     * Helper method that creates a toast to display information to the user
+     * @param message
+     */
     public void makeToast(String message){
         Toast.makeText(this.getActivity(), message, Toast.LENGTH_LONG).show();
     }
 
-
+    /**
+     * Helper class that will asynchronously download and then display an image
+     */
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 
