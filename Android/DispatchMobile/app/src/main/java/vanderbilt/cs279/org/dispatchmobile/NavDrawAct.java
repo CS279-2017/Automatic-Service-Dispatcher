@@ -27,18 +27,31 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * Main UI activity. This contains the Navigation drawer implementation and
+ * gives the application fragments a framework to display in
+ */
 public class NavDrawAct extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    // Log Tag
     public static final String TAG = NavDrawAct.class.getCanonicalName();
+
+    // constant used to ensure that the app has queried the user to enable the
+    // location permission
     private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION=1;
 
+    // Preferences and session information
     private static final String mPREFERENCES = "GlowPrefs";
     private static final String mSessionId = "sessionKey";
-    private static final String mDeviceId = "deviceId";
 
     //////////////////////////////////////////////////////////////////////////////
     // Location Service
+
+    /**
+     * This checks if the user has enabled location permissions, and if not asks them
+     * to enable them.
+     */
     private void setupLocationService(){
 
         if(ContextCompat.checkSelfPermission(this,
@@ -62,6 +75,12 @@ public class NavDrawAct extends AppCompatActivity
 
     }
 
+    /**
+     * callback method used once user has responded to location permission request
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(
             int requestCode,
@@ -96,9 +115,15 @@ public class NavDrawAct extends AppCompatActivity
     //
     ////////////////////////////////////////////////////////////////////
 
+    /**
+     * Activity lifecycle method called when activity is created. Initializes activity state
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // setup UI layout
         setContentView(R.layout.activity_nav_draw);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -120,12 +145,16 @@ public class NavDrawAct extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        // set the default fragment to a mapViewFragment with no task argument
         changeActiveFragment(new MapViewFragment());
 
         // TODO: 2017-02-23 activate for deployment
         setupLocationService();
     }
 
+    /**
+     * Activity lifecycle method called when activity is destroyed. Cleans up location service
+     */
     @Override
     protected void onDestroy(){
         super.onDestroy();
@@ -133,12 +162,20 @@ public class NavDrawAct extends AppCompatActivity
         Log.i(TAG, "service stopped");
     }
 
+    /**
+     * Activity lifecycle method called when unpaused.
+     */
     @Override
     protected  void onResume(){
         super.onResume();
         // TODO: 2017-02-23 checkSession
     }
 
+    /**
+     * Navigation drawer callback invoked when the back button is pressed.
+     * Currently closes the drawer if open. Otherwise calls base back button
+     * implementation
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -149,6 +186,12 @@ public class NavDrawAct extends AppCompatActivity
         }
     }
 
+    /**
+     * Hook method that creates the options menu for the activity. Simply inflates
+     * the layout resource.
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -156,6 +199,12 @@ public class NavDrawAct extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Hook method called when an options menu item is selected. Checks item id, and
+     * performs appropriate action for the pressed item. Right now shell implementation
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -175,55 +224,60 @@ public class NavDrawAct extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Hook method called when an item in the navigation drawer is selected.
+     * Changes active fragment based on which item is selected.
+     * @param item
+     * @return
+     */
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        // Change the active fragment to the map view
         if (id == R.id.nav_map) {
-            // Handle the camera action
             changeActiveFragment(new MapViewFragment());
+
+        // Change active fragment to the NextTaskFrag
         } else if (id == R.id.nav_get_list) {
-            //changeActiveFragment(new TaskListFrag());
             changeActiveFragment(new NextTaskFrag());
+
+        // change to the job history fragment
         } else if (id == R.id.nav_past_jobs) {
             changeActiveFragment(new CompletedTaskListFrag());
-            //Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
-            //toast.show();
+
+        // Change to the profile fragment.
         } else if (id == R.id.nav_profile) {
             changeActiveFragment(new ProfileFragment());
-            /*Toast toast = Toast.makeText(getApplicationContext(), "Not Yet Implemented", Toast.LENGTH_SHORT);
-            toast.show();
 
-            MapViewFragment mapDirTest = new MapViewFragment();
-
-            Bundle args = new Bundle();
-            args.putDouble(MapViewFragment.LAT_DEST_KEY, 36.203177);
-            args.putDouble(MapViewFragment.LONG_DEST_KEY, -86.738602);
-
-            mapDirTest.setArguments(args);
-
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.content_nav_draw, mapDirTest);
-            transaction.commit();*/
-
+        // Log the user out
         } else if (id == R.id.nav_logout) {
             String sessionId = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE).getString(mSessionId, "N/A");
             logout(sessionId);
         }
 
+        // Close the drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    /**
+     * Helper method that changes the active fragment of the navigation drawer activity.
+     * @param newFrag
+     */
     private void changeActiveFragment(Fragment newFrag){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.content_nav_draw, newFrag);
         transaction.commit();
     }
 
+    /**
+     * Helper method that logs the user out
+     * @param session
+     */
     private void logout(String session){
         //https://futurestud.io/tutorials/how-to-run-an-android-app-against-a-localhost-api
 
@@ -231,17 +285,21 @@ public class NavDrawAct extends AppCompatActivity
                 .baseUrl("http://10.0.2.2:8000/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-
         GlowAPI glow = retrofit.create(GlowAPI.class);
 
+        // retrofit api call to log the user out
         Call<Object> call = glow.logout(session);
         call.enqueue(new Callback<Object>() {
             @Override
             public void onResponse(Call<Object> call, Response<Object> response) {
                 if (response.isSuccessful()) {
+
+                    // Clear the sessionID sharedPreference
                     SharedPreferences.Editor editor = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE).edit();
                     editor.putString(mSessionId, "N/A");
                     editor.apply();
+
+                    // Force the user to log in
                     openLoginView();
                 } else {
                     //nothing happens at failure
@@ -255,6 +313,9 @@ public class NavDrawAct extends AppCompatActivity
         });
     }
 
+    /**
+     * Helper method that forces the user to log in
+     */
     private void openLoginView(){
         Intent myIntent = new Intent(this, LoginActivity.class);
         myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
