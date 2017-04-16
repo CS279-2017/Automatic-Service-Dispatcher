@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,6 +58,8 @@ public class CompletedTaskListFrag extends ListFragment implements AdapterView.O
     private TasksAdapter mAdapter;
     private ProgressBar mProgressView;
     private ListView mListView;
+    private RecyclerView mRecyclerView;
+
     private ExpandableListView mExpandable;
 
     // Shared Preferences for Session

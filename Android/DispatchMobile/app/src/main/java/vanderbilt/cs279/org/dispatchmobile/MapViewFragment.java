@@ -5,6 +5,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,6 +33,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 //package vanderbilt.cs279.org.dispatchmobile;
@@ -75,6 +77,10 @@ public class MapViewFragment extends Fragment
     public static final String LONG_DEST_KEY = "long";
 
     MapView mMapView;
+    FloatingActionButton mBtn_Cancel;
+    FloatingActionButton mBtn_Confirm;
+    TextView mJobLocation, mVolume, mWage, mPinCode;
+
     private GoogleMap googleMap;
 
     LatLng mDestination = null;
@@ -95,6 +101,27 @@ public class MapViewFragment extends Fragment
         }
 
         mMapView = (MapView) rootView.findViewById(R.id.mapView);
+        mJobLocation = (TextView) rootView.findViewById((R.id.jobInfo));
+        mVolume = (TextView) rootView.findViewById((R.id.jobInfo));
+        mWage = (TextView) rootView.findViewById((R.id.jobInfo));
+        mPinCode = (TextView) rootView.findViewById((R.id.jobInfo));
+
+        mBtn_Cancel = (FloatingActionButton) rootView.findViewById(R.id.btn_cancel_task);
+        mBtn_Confirm = (FloatingActionButton) rootView.findViewById(R.id.btn_confirm_task);
+        mBtn_Confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // confirm the task
+
+            }
+        });
+        mBtn_Cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // cancel the task
+
+            }
+        });
         mMapView.onCreate(savedInstanceState);
 
 
