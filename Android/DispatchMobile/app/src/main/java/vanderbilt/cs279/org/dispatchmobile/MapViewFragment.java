@@ -1,5 +1,8 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -7,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +40,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 //package vanderbilt.cs279.org.dispatchmobile;
 //
 //import android.os.Bundle;
@@ -63,7 +73,11 @@ public class MapViewFragment extends Fragment
     implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener, DirectionCallback {
 
+    Retrofit retrofit;
+    GlowAPI glowAPI;
+    SharedPreferences mSharedPreferences;
 
+    Task mCurrentTask;
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
     LatLng latLng;
@@ -71,6 +85,14 @@ public class MapViewFragment extends Fragment
     Marker currLocMarker;
 
     private String serverKey = "AIzaSyDEzbQHvv2frw-KIiiS7yCIOro7-NM9vTI";
+
+    // Shared Preferences key used to store the user's session id
+    private static final String mPREFERENCES = "GlowPrefs";
+
+    // the user's session id
+    private static final String mSessionId = "sessionKey";
+
+    private static final String mDeviceId = "deviceId";
 
     private static final String TAG = vanderbilt.cs279.org.dispatchmobile.MapViewFragment.class.getCanonicalName();
     public static final String LAT_DEST_KEY = "lat";
@@ -81,7 +103,7 @@ public class MapViewFragment extends Fragment
     MapView mMapView;
     FloatingActionButton mBtn_Cancel;
     FloatingActionButton mBtn_Confirm;
-    TextView mJobLocation, mVolume, mWage, mPinCode;
+    TextView mJobLocation, mVolume, mWageInfo, mPinCode;
 
     private GoogleMap googleMap;
 
@@ -108,11 +130,23 @@ public class MapViewFragment extends Fragment
 
         }
 
+        retrofit = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:8000/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        glowAPI = retrofit.create(GlowAPI.class);
+
+        mSharedPreferences = this.getActivity().getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+
+
+
+
+
         mMapView = (MapView) rootView.findViewById(R.id.mapView);
         mJobLocation = (TextView) rootView.findViewById((R.id.jobInfo));
-        mVolume = (TextView) rootView.findViewById((R.id.jobInfo));
-        mWage = (TextView) rootView.findViewById((R.id.jobInfo));
-        mPinCode = (TextView) rootView.findViewById((R.id.jobInfo));
+        mVolume = (TextView) rootView.findViewById((R.id.waterVolume));
+        mWageInfo = (TextView) rootView.findViewById((R.id.jobWage));
+        mPinCode = (TextView) rootView.findViewById((R.id.jobPinCode));
 
         mBtn_Cancel = (FloatingActionButton) rootView.findViewById(R.id.btn_cancel_task);
         mBtn_Confirm = (FloatingActionButton) rootView.findViewById(R.id.btn_confirm_task);
@@ -120,14 +154,40 @@ public class MapViewFragment extends Fragment
             @Override
             public void onClick(View v) {
                 // confirm the task
-
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());//getActivity());
+                builder.setMessage("Are you sure that you complete the task?").setTitle("Confirm the task")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                  confirm_task();
+                            }
+                        });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
         mBtn_Cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // cancel the task
-
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());//getActivity());
+                builder.setMessage("Are you sure to cancel the task?").setTitle("Cancel the task")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                  cancel_task();
+                            }
+                        });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
         mMapView.onCreate(savedInstanceState);
@@ -145,6 +205,42 @@ public class MapViewFragment extends Fragment
         mMapView.getMapAsync(this);
 
         return rootView;
+    }
+
+    private void checkCurrentTask(String session, String deviceId){
+
+        // check the current task and show the info
+        Call<Task> call = glowAPI.getMyTask(session, deviceId);
+        call.enqueue(new Callback<Task>() {
+        @Override
+        public void onResponse(Call<Task> call, Response<Task> response) {
+            if (response.isSuccessful()) {
+                mCurrentTask = response.body();
+                mJobLocation.setText(mCurrentTask.name+" at Pad "+mCurrentTask.sensor);
+                mVolume.setText(mCurrentTask.levelAtRequest+" of "+mCurrentTask.tankCapacity);
+                mPinCode.setText(mCurrentTask.pinCode);
+                mWageInfo.setText(mCurrentTask.wage);
+            } else {
+                // No Session
+
+            }
+        }
+            @Override
+            public void onFailure(Call<Task> call, Throwable t) {
+                // something went completely south (like no internet connection)
+                Log.e("Error", t.getMessage());
+            }
+        });
+
+    }
+
+    private void confirm_task() {
+        // confirm the task is completed
+    }
+
+    private void cancel_task() {
+        // cancel the current task
+
     }
 
     @Override
@@ -185,6 +281,11 @@ public class MapViewFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
+        String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
+        String deviceId = mSharedPreferences.getString(mDeviceId, "N/A");
+        if(!sessionId.equals("N/A")){
+            checkCurrentTask(sessionId, deviceId);
+        }
         mMapView.onResume();
     }
 
