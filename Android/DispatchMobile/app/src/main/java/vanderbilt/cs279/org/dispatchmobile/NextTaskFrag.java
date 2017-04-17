@@ -44,10 +44,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by gpettet on 2017-02-23.
+ *
+ * Fragment that displays information regarding a task that a user may accept.
+ * If the user accepts said task, it will change the current fragment to a
+ * MapViewFragment containing routing information to the accepted task's well
  */
 
 public class NextTaskFrag extends Fragment {
-    //private TasksAdapter mAdapter;
+
+    // UI elements
     private ProgressBar mTankProgress;
     private TextView mTaskTitle, mTankProgressWords, mTime, mWage;
     private ImageView mImage;
@@ -57,15 +62,20 @@ public class NextTaskFrag extends Fragment {
     private static final String mPREFERENCES = "GlowPrefs";
     private static final String mSessionId = "sessionKey";
     private static final String mDeviceId = "deviceId";
-
-    private String message = "";
-
     SharedPreferences mSharedPreferences;
     Retrofit retrofit;
     GlowAPI glowAPI;
 
+    // task to display
     Task mCurrentTask;
 
+    /**
+     * Fragment lifecycle method called when fragment is created. It inflates the fragment's view
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -73,9 +83,17 @@ public class NextTaskFrag extends Fragment {
         return view;
     }
 
+    /**
+     * Fragment lifecycle method called after the view is inflated. Initializes this fragment's
+     * non-view state.
+     * @param view
+     * @param savedInstanceState
+     */
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        // Obtain references to UI elements
         mTaskTitle = (TextView) view.findViewById(R.id.taskTitle);
         mTankProgress = (ProgressBar) view.findViewById(R.id.tankProgress);
         mTankProgressWords = (TextView) view.findViewById(R.id.tankProgressWords);
@@ -83,6 +101,10 @@ public class NextTaskFrag extends Fragment {
         mWage = (TextView) view.findViewById(R.id.jobExpectedWage);
         mImage = (ImageView) view.findViewById(R.id.locationImage);
         mAcceptButton = (Button) view.findViewById(R.id.acceptButton);
+
+        // Set the accpet button's click listener. It will prompt the user with an
+        // AlertDialog asking them to accept or cancel the task. If accepted, it will
+        // call the startTask() helper method below
         mAcceptButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());//getActivity());
@@ -103,22 +125,29 @@ public class NextTaskFrag extends Fragment {
             }
         });
 
+        // retrofit setup
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://10.0.2.2:8000/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         glowAPI = retrofit.create(GlowAPI.class);
 
+        // sharedPreferences setup
         mSharedPreferences = this.getActivity().getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
     }
 
+    // Android lifecycle method called each time the fragment is unpaused
     @Override
     public void onResume() {
         super.onResume();
         getNextTask();
     }
 
-
+    /**
+     * Helper method that queries the server for this user's possible next task.
+     * If the user has a valid session with the server, it calls the overloaded
+     * method below, otherwise it forces the user to login
+     */
     private void getNextTask(){
         String sessionId = mSharedPreferences.getString(mSessionId, "N/A");
         //TODO: only needed for login? if they are logged in to multiple devices this would
@@ -131,12 +160,27 @@ public class NextTaskFrag extends Fragment {
         }
     }
 
+    /**
+     * Helper method that queries the server for this user's possible next task.
+     * @param session
+     * @param deviceId
+     */
     private void getNextTask(String session, String deviceId){
+
+        // retrofit api call to request task information
         Call<Task> call = glowAPI.loadNextTask(session, deviceId);
         call.enqueue(new Callback<Task>() {
+
+            /**
+             * Callback method invoked when the server request for Task information
+             * returns successfully. Updates the fragment's state using the information
+             * returned from the call (encoded in the Task object via Retrofit)
+             */
             @Override
             public void onResponse(Call<Task> call, Response<Task> response) {
                 if (response.isSuccessful()) {
+
+                    // update ui elemements
                     //TODO: Add to view
                     mCurrentTask = response.body();
 
@@ -157,6 +201,12 @@ public class NextTaskFrag extends Fragment {
                     openLoginView();
                 }
             }
+
+            /**
+             * Callback method invoked if the server request fails.
+             * @param call
+             * @param t
+             */
             @Override
             public void onFailure(Call<Task> call, Throwable t) {
                 // something went completely south (like no internet connection)
@@ -165,15 +215,33 @@ public class NextTaskFrag extends Fragment {
         });
     }
 
+    /**
+     * Navigates the user to the login view. To be used if user needs to re-login
+     */
     private void openLoginView(){
         Intent myIntent = new Intent(this.getActivity(), LoginActivity.class);
         myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(myIntent);
     }
 
+    /**
+     * Helper method that starts the given task. It sets the current fragment to a
+     * MapViewFragment that will display routing information to the Task's well location
+     * @param session
+     * @param task
+     */
     private void startTask(String session, final Task task){
+
+        // retrofit api call to tell the server that the task was accepted
         Call<Task> call = glowAPI.startTask(session, task.taskId);
         call.enqueue(new Callback<Task>() {
+
+            /**
+             * Callback method invoked when the server request to accept the task was
+             * successful. This will start the map fragment
+             * @param call
+             * @param response
+             */
             @Override
             public void onResponse(Call<Task> call, Response<Task> response) {
                 if (response.isSuccessful()) {
@@ -182,14 +250,15 @@ public class NextTaskFrag extends Fragment {
 
                     MapViewFragment mapDirTest = new MapViewFragment();
 
+                    // create the bundle containing the task information
                     Bundle args = new Bundle();
-
                     args.putDouble(MapViewFragment.LAT_DEST_KEY, (double)task.lattitude);
                     args.putDouble(MapViewFragment.LONG_DEST_KEY, (double)task.longitude);
 
 
                     mapDirTest.setArguments(args);
 
+                    // commit the fragment transaction to start the map fragment
                     FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                     transaction.replace(R.id.content_nav_draw, mapDirTest);
                     transaction.commit();
@@ -209,6 +278,11 @@ public class NextTaskFrag extends Fragment {
         });
     }
 
+    /**
+     * Helper method that returns the time from a date string
+     * @param date
+     * @return
+     */
     private String getTime(String date){
         String time = "";
         Log.e("Date", date);
