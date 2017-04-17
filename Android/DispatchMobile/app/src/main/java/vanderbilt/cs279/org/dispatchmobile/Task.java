@@ -29,6 +29,8 @@ public class Task {
     int minutesOpen;
     int levelAtRequest;
     int tankCapacity;
+    String pinCode;
+    String wage;
 
     /**
      * Returns a String containing this task's name

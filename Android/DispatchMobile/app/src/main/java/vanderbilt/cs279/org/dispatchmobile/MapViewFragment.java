@@ -73,11 +73,16 @@ public class MapViewFragment extends Fragment
     private static final String TAG = vanderbilt.cs279.org.dispatchmobile.MapViewFragment.class.getCanonicalName();
     public static final String LAT_DEST_KEY = "lat";
     public static final String LONG_DEST_KEY = "long";
+    public static final String WAGE_KEY = "wage";
+    public static final String PIN_CODE_KEY = "pin_code";
 
     MapView mMapView;
     private GoogleMap googleMap;
 
     LatLng mDestination = null;
+
+    String mWage = "default";
+    String mPin = "default";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -91,6 +96,9 @@ public class MapViewFragment extends Fragment
             Log.i(TAG, "getting dirctions");
             mDestination = new LatLng((double)args.get(LAT_DEST_KEY),
                                     (double)args.get(LONG_DEST_KEY));
+
+            mWage = args.getString(WAGE_KEY);
+            mPin = args.getString(PIN_CODE_KEY);
 
         }
 

@@ -251,6 +251,7 @@ public class NextTaskFrag extends Fragment {
                     Bundle args = new Bundle();
                     args.putDouble(MapViewFragment.LAT_DEST_KEY, (double)task.lattitude);
                     args.putDouble(MapViewFragment.LONG_DEST_KEY, (double)task.longitude);
+                    args.putString()
 
                     // set the fragment arguments to contain the bundle
                     mapDirTest.setArguments(args);
