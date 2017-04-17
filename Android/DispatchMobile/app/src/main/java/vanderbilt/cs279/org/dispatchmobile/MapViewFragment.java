@@ -71,15 +71,12 @@ public class MapViewFragment extends Fragment
     private String serverKey = "AIzaSyDEzbQHvv2frw-KIiiS7yCIOro7-NM9vTI";
 
     private static final String TAG = vanderbilt.cs279.org.dispatchmobile.MapViewFragment.class.getCanonicalName();
-    public static final String LAT_DEST_KEY = "lat";
-    public static final String LONG_DEST_KEY = "long";
-    public static final String WAGE_KEY = "wage";
-    public static final String PIN_CODE_KEY = "pin_code";
 
     MapView mMapView;
     private GoogleMap googleMap;
 
     LatLng mDestination = null;
+    
 
     String mWage = "default";
     String mPin = "default";
@@ -90,17 +87,6 @@ public class MapViewFragment extends Fragment
         View rootView = inflater.inflate(R.layout.map_fragment_view, container, false);
 
         Bundle args = getArguments();
-
-        if (args != null && args.containsKey(LAT_DEST_KEY) && args.containsKey(LONG_DEST_KEY)){
-
-            Log.i(TAG, "getting dirctions");
-            mDestination = new LatLng((double)args.get(LAT_DEST_KEY),
-                                    (double)args.get(LONG_DEST_KEY));
-
-            mWage = args.getString(WAGE_KEY);
-            mPin = args.getString(PIN_CODE_KEY);
-
-        }
 
         mMapView = (MapView) rootView.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
@@ -179,6 +165,14 @@ public class MapViewFragment extends Fragment
         mMapView.onLowMemory();
     }
 
+    private void setupDestMarker(LatLng destination){
+        GoogleDirection.withServerKey(serverKey)
+                .from(currLocMarker.getPosition())
+                .to(destination)
+                .transportMode(TransportMode.DRIVING)
+                .execute(this);
+    }
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
@@ -201,11 +195,7 @@ public class MapViewFragment extends Fragment
 
                 Log.i(TAG, "directions: connected");
 
-                GoogleDirection.withServerKey(serverKey)
-                        .from(currLocMarker.getPosition())
-                        .to(mDestination)
-                        .transportMode(TransportMode.DRIVING)
-                        .execute(this);
+                setupDestMarker(mDestination);
 
             }
 

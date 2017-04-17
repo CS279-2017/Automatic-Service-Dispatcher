@@ -5,6 +5,7 @@ import java.security.Timestamp;
 
 import retrofit2.Call;
 import retrofit2.http.Field;
+import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -73,4 +74,14 @@ public interface GlowAPI {
     @FormUrlEncoded
     @POST("/api/android/start_task/")
     Call<Task> startTask(@Field("session")String session, @Field("taskId")long taskId);
+
+    @FormUrlEncoded
+    @POST("/api/android/my_task/")
+    Call<Task> getMyTask(@Field("session")String session, @Field("deviceId")String deviceId);
+
+    @FormUrlEncoded
+    @POST("/api/android/cancel_task/")
+    Call<Object> cancelTask(@Field("session")String session,
+                            @Field("taskId")long taskId,
+                            @Field("deviceId")String deviceId);
 }
