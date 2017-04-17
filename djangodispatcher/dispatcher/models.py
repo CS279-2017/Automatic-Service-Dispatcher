@@ -212,7 +212,7 @@ class Task(models.Model):
                 "sensor": self.pad.sensorId, "dateCompleted": self.datecompleted, "hoursOpen": hoursOpen, "minutesOpen": minutes,
                 "lattitude": self.pad.location.lat, "longitude": self.pad.location.longitude,
                 "levelAtRequest": self.level_at_request, 'tankCapacity': self.tank_capacity,
-                "estimatedPrice": self.level_at_request*self.skill.wage_rate}
+                "estimatedPrice": self.level_at_request*self.skill.wage_rate, 'pinCode': self.pad.passcode, 'wage': self.skill.wage_rate}
 
 
 class Pad(models.Model):

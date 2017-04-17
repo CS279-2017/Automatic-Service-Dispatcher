@@ -35,3 +35,5 @@
 ######################
 /dispatcher/migrations/**
 !/dispatcher/migrations/__init__.py
+
+.sqlite3
