@@ -191,7 +191,8 @@ public class NextTaskFrag extends Fragment {
                     mTaskTitle.setText(mCurrentTask.name+" at Pad "+mCurrentTask.sensor);
                     mTime.setText(getTime(mCurrentTask.date));
                     // @TODO task.getWage()?
-                    mWage.setText("$215");
+                    mWage.setText(mCurrentTask.wage);
+
 
                     mTankProgress.setProgress(100*mCurrentTask.levelAtRequest/mCurrentTask.tankCapacity);
                     mTankProgressWords.setText("Tank Level: "+ mCurrentTask.levelAtRequest+" of "+mCurrentTask.tankCapacity);
@@ -252,10 +253,10 @@ public class NextTaskFrag extends Fragment {
 
                     // create the bundle containing the task information
                     Bundle args = new Bundle();
-                    args.putDouble(MapViewFragment.LAT_DEST_KEY, (double)task.lattitude);
-                    args.putDouble(MapViewFragment.LONG_DEST_KEY, (double)task.longitude);
-                    args.putString(MapViewFragment.WAGE_KEY, (String)task.wage);
-                    args.putString(MapViewFragment.PIN_CODE_KEY, (String)task.pinCode);
+      //              args.putDouble(MapViewFragment.LAT_DEST_KEY, (double)task.lattitude);
+       //             args.putDouble(MapViewFragment.LONG_DEST_KEY, (double)task.longitude);
+        //            args.putString(MapViewFragment.WAGE_KEY, (String)task.wage);
+       //             args.putString(MapViewFragment.PIN_CODE_KEY, (String)task.pinCode);
 
 
                     mapDirTest.setArguments(args);

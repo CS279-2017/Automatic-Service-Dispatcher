@@ -21,26 +21,25 @@ public interface GlowAPI {
     //http://stackoverflow.com/questions/36703737/simple-login-form-with-retrofit
     @FormUrlEncoded
     @POST("/accounts/android_login/")
-    Call<LoginResult> getUserLogin(@Field("username") String uname, @Field("password") String password, @Field("deviceId") String deviceId);
+    Call<LoginResult> getUserLogin(@Field("username")String uname, @Field("password")String password, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/accounts/check_session/")
-    Call<LoginResult> getSession(@Field("session") String session, @Field("deviceId") String deviceId);
+    Call<LoginResult> getSession(@Field("session")String session, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/accounts/android_logout/")
-    Call<Object> logout(@Field("session") String session);
+    Call<Object> logout(@Field("session")String session);
 
     //Todo: some sort of session key
     @GET("https://maps.googleapis.com/maps/api/staticmap")
     Call<TaskList> loadMapIcon(@Query("center") String center, @Query("zoom") String zoom,
-                               @Query("size") String size, @Query("maptype") String maptype,
-                               @Query("key") String key);
+                                   @Query("size") String size, @Query("maptype") String maptype,
+                                   @Query("key") String key);
 
     // Location Update
     @FormUrlEncoded
-    @POST("/api/android/update_location")
-    // todo web server location api
+    @POST("/api/android/update_location") // todo web server location api
     Call<Object> updateLocation(@Field("session") String session,
                                 @Field("timeStamp") long timestamp,
                                 @Field("latitude") double latitude,
@@ -49,41 +48,40 @@ public interface GlowAPI {
 
     @FormUrlEncoded
     @POST("/api/android/next_task/")
-    Call<Task> loadNextTask(@Field("session") String session, @Field("deviceId") String deviceId);
+    Call<Task> loadNextTask(@Field("session")String session, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/api/android/previous_tasks/")
-    Call<TaskList> loadPreviousTasks(@Field("session") String session, @Field("deviceId") String deviceId);
+    Call<TaskList> loadPreviousTasks(@Field("session")String session, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/api/android/get_user/")
-    Call<UserInformation> getUserInfo(@Field("session") String session);
+    Call<UserInformation> getUserInfo(@Field("session")String session);
 
     @FormUrlEncoded
     @POST("/api/android/update_user/")
-    Call<UserInformation> updateUserInfo(@Field("session") String session,
-                                         @Field("firstName") String firstName,
-                                         @Field("lastName") String lastName,
-                                         @Field("email") String email,
+    Call<UserInformation> updateUserInfo(@Field("session")String session,
+                                         @Field("firstName")String firstName,
+                                         @Field("lastName")String lastName,
+                                         @Field("email")String email,
                                          @Field("profession") String profession,
-                                         @Field("jobs") long[] jobs);
+                                         @Field("jobs")long[] jobs);
 
     @FormUrlEncoded
     @POST("/api/android/complete_task/")
-    Call<TaskList> completeTask(@Field("session") String session, @Field("taskId") long taskId);
+    Call<TaskList> completeTask(@Field("session")String session, @Field("taskId")long taskId);
 
     @FormUrlEncoded
     @POST("/api/android/start_task/")
-    Call<Task> startTask(@Field("session") String session, @Field("taskId") long taskId);
+    Call<Task> startTask(@Field("session")String session, @Field("taskId")long taskId);
 
     @FormUrlEncoded
     @POST("/api/android/my_task/")
-    Call<Task> getMyTask(@Field("session") String session, @Field("deviceId") String deviceId);
+    Call<Task> getMyTask(@Field("session")String session, @Field("deviceId")String deviceId);
 
     @FormUrlEncoded
     @POST("/api/android/cancel_task/")
-    Call<Object> cancelTask(@Field("session") String session,
-                            @Field("taskId") long taskId,
-                            @Field("deviceId") String deviceId);
-
+    Call<Object> cancelTask(@Field("session")String session,
+                            @Field("taskId")long taskId,
+                            @Field("deviceId")String deviceId);
 }

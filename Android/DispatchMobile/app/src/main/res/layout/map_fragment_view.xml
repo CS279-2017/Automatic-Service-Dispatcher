@@ -28,9 +28,10 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="jobInfo"
-                android:textSize="30dp"
+                android:textSize="25dp"
                 android:textColor="#2d2d2d"
                 android:textStyle="bold"
+                android:maxLines="1"
                 android:background="@drawable/text_view_border"
                 />
 
