@@ -191,7 +191,7 @@ public class NextTaskFrag extends Fragment {
                     mTaskTitle.setText(mCurrentTask.name+" at Pad "+mCurrentTask.sensor);
                     mTime.setText(getTime(mCurrentTask.date));
                     // @TODO task.getWage()?
-                    mWage.setText(mCurrentTask.wage);
+                    mWage.setText("Wage: $"+mCurrentTask.wage);
 
 
                     mTankProgress.setProgress(100*mCurrentTask.levelAtRequest/mCurrentTask.tankCapacity);

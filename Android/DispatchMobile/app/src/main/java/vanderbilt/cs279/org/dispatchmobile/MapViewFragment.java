@@ -233,9 +233,9 @@ public class MapViewFragment extends Fragment
             if (response.isSuccessful()) {
                 mCurrentTask = response.body();
                 mJobLocation.setText(mCurrentTask.name+" at Pad "+mCurrentTask.sensor);
-                mVolume.setText(mCurrentTask.levelAtRequest+" of "+mCurrentTask.tankCapacity);
-                mPinCode.setText(mCurrentTask.pinCode);
-                mWageInfo.setText(mCurrentTask.wage);
+                mVolume.setText("Tank Level:"+ mCurrentTask.levelAtRequest+" of "+mCurrentTask.tankCapacity);
+                mPinCode.setText("PinCode:"+ mCurrentTask.pinCode);
+                mWageInfo.setText("$"+mCurrentTask.wage);
                 mDestination = new LatLng(mCurrentTask.lattitude,
                         mCurrentTask.longitude);
             } else {
