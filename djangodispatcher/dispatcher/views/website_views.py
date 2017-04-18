@@ -114,10 +114,14 @@ data: {sensorID; sensorID,
 @csrf_exempt
 def delegate(request):
     sample_data = request.body
+    return redelegate(request, json.loads(sample_data))
+
+def redelegate(request, body):
+    # sample_data = request.body
     # TODO: take into account if a user is already at that location
     # TODO: python 3 receives 'bytes' instead of string, so data needs to be decoded
     # sample_data = request.body.decode('utf-8')
-    body = json.loads(sample_data)
+    # body = json.loads(sample_data)
     try:
         tag = body['tag']
         data = body['data']
@@ -165,7 +169,6 @@ def delegate(request):
         return JsonResponse({"users": user.get_my_workers(), "sensors": user.get_pads()})
     except Profile.DoesNotExist:
         return JsonResponse({"result": "success", 'name': task.skill.name, 'date': task.date, 'taskId': task.pk})
-
 
 '''
 This endpoint posts data to the delegate api to test functionality
