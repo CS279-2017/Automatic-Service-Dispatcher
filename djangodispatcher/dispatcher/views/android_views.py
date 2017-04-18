@@ -8,6 +8,8 @@ from dispatcher.models import Task, Profile, Location, Skill
 from django.utils import timezone
 import datetime, urllib, base64
 
+from .website_views import redelegate
+
 
 # TODO change name
 @csrf_exempt
@@ -51,6 +53,27 @@ def get_next_task(request):
 
         return JsonResponse(intermediate)
     except Profile.DoesNotExist:
+        return JsonResponse({"result": "bad"}, status=401)
+
+
+@csrf_exempt
+def cancel_current_task(request):
+    session = request.POST.get('session', -1)
+    deviceId = request.POST['deviceId']
+    taskId = request.POST.get('taskId')
+    try:
+        user = Profile.objects.get(session=session)
+        user.device = deviceId
+        task = Task.objects.get(pk=int(taskId))
+        task.start_date = None
+        task.declined_workers.add(user)
+        user.tasks.remove(task)
+        task.save()
+        user.save()
+        redelegate(request, {'tag': {'metric': task.skill.title}, 'data': {'sensorID': task.pad.sensorId, 'date': task.date,
+        'waterLevel': task.level_at_request, 'manuallyScheduled': task.manually_scheduled}})
+        return JsonResponse({})
+    except (Profile.DoesNotExist, Task.DoesNotExist, ValueError):
         return JsonResponse({"result": "bad"}, status=401)
 
 

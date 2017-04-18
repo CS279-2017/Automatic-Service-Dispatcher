@@ -1,11 +1,16 @@
 package vanderbilt.cs279.org.dispatchmobile;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,8 +37,15 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 //package vanderbilt.cs279.org.dispatchmobile;
 //
 //import android.os.Bundle;
@@ -61,7 +73,11 @@ public class MapViewFragment extends Fragment
     implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener, DirectionCallback {
 
+    Retrofit retrofit;
+    GlowAPI glowAPI;
+    SharedPreferences mSharedPreferences;
 
+    Task mCurrentTask;
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
     LatLng latLng;
@@ -70,9 +86,21 @@ public class MapViewFragment extends Fragment
 
     private String serverKey = "AIzaSyDEzbQHvv2frw-KIiiS7yCIOro7-NM9vTI";
 
+    // Shared Preferences key used to store the user's session id
+    private static final String mPREFERENCES = "GlowPrefs";
+
+    // the user's session id
+    private static final String mSessionId = "sessionKey";
+
+    private static final String mDeviceId = "deviceId";
+
     private static final String TAG = vanderbilt.cs279.org.dispatchmobile.MapViewFragment.class.getCanonicalName();
 
     MapView mMapView;
+    FloatingActionButton mBtn_Cancel;
+    FloatingActionButton mBtn_Confirm;
+    TextView mJobLocation, mVolume, mWageInfo, mPinCode;
+
     private GoogleMap googleMap;
 
     LatLng mDestination = null;
@@ -81,6 +109,10 @@ public class MapViewFragment extends Fragment
     String mWage = "default";
     String mPin = "default";
 
+
+    String sessionId;
+    String deviceId;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -88,7 +120,92 @@ public class MapViewFragment extends Fragment
 
         Bundle args = getArguments();
 
+        mSharedPreferences = this.getActivity().getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+
+        sessionId = mSharedPreferences.getString(mSessionId, "N/A");
+
+        deviceId = mSharedPreferences.getString(mDeviceId, "N/A");
+
+/*
+        if (args != null && args.containsKey(LAT_DEST_KEY) && args.containsKey(LONG_DEST_KEY)){
+
+            Log.i(TAG, "getting dirctions");
+            mDestination = new LatLng((double)args.get(LAT_DEST_KEY),
+                                    (double)args.get(LONG_DEST_KEY));
+
+            mWage = args.getString(WAGE_KEY);
+            mPin = args.getString(PIN_CODE_KEY);
+
+        }
+*/
+        retrofit = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:8000/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        glowAPI = retrofit.create(GlowAPI.class);
+
+        mSharedPreferences = this.getActivity().getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
+
         mMapView = (MapView) rootView.findViewById(R.id.mapView);
+        mJobLocation = (TextView) rootView.findViewById((R.id.jobInfo));
+        mVolume = (TextView) rootView.findViewById((R.id.waterVolume));
+        mWageInfo = (TextView) rootView.findViewById((R.id.jobWage));
+        mPinCode = (TextView) rootView.findViewById((R.id.jobPinCode));
+
+        mBtn_Cancel = (FloatingActionButton) rootView.findViewById(R.id.btn_cancel_task);
+        mBtn_Confirm = (FloatingActionButton) rootView.findViewById(R.id.btn_confirm_task);
+
+
+        if(!sessionId.equals("N/A")){
+            checkCurrentTask(sessionId, deviceId);
+        }
+
+
+        mBtn_Confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // confirm the task
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());//getActivity());
+                builder.setMessage("Are you sure that you complete the task?").setTitle("Confirm the task")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                  confirm_task(sessionId, mCurrentTask.taskId);
+                            }
+                        });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
+        mBtn_Cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // cancel the task
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());//getActivity());
+                builder.setMessage("Are you sure to cancel the task?").setTitle("Cancel the task")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                  cancel_task(sessionId, mCurrentTask.taskId, mDeviceId);
+                            }
+                        });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
+
+
+
+
+
         mMapView.onCreate(savedInstanceState);
 
 
@@ -104,6 +221,78 @@ public class MapViewFragment extends Fragment
         mMapView.getMapAsync(this);
 
         return rootView;
+    }
+
+    private void checkCurrentTask(String session, String deviceId){
+
+        // check the current task and show the info
+        Call<Task> call = glowAPI.getMyTask(session, deviceId);
+        call.enqueue(new Callback<Task>() {
+        @Override
+        public void onResponse(Call<Task> call, Response<Task> response) {
+            if (response.isSuccessful()) {
+                mCurrentTask = response.body();
+                mJobLocation.setText(mCurrentTask.name+" at Pad "+mCurrentTask.sensor);
+                mVolume.setText("Tank Level:"+ mCurrentTask.levelAtRequest+" of "+mCurrentTask.tankCapacity);
+                mPinCode.setText("PinCode:"+ mCurrentTask.pinCode);
+                mWageInfo.setText("$"+mCurrentTask.wage);
+                mDestination = new LatLng(mCurrentTask.lattitude,
+                        mCurrentTask.longitude);
+            } else {
+                // No Session
+
+            }
+        }
+            @Override
+            public void onFailure(Call<Task> call, Throwable t) {
+                // something went completely south (like no internet connection)
+                Log.e("Error", t.getMessage());
+            }
+        });
+
+    }
+
+    private void confirm_task(String session, long taskId) {
+        // confirm the task is completed
+        Call<TaskList> call = glowAPI.completeTask(session, taskId);
+        call.enqueue(new Callback<TaskList>() {
+            @Override
+            public void onResponse(Call<TaskList> call, Response<TaskList> response) {
+                if (response.isSuccessful()) {
+                    Log.v("res", response.body().toString());
+                } else {
+                    // No Session
+                    Log.v("res", response.body().toString());
+                }
+            }
+            @Override
+            public void onFailure(Call<TaskList> call, Throwable t) {
+                // something went completely south (like no internet connection)
+                Log.e("Error", t.getMessage());
+            }
+        });
+    }
+
+    private void cancel_task(String session, long taskId, String deviceId) {
+        // cancel the current task
+        Call<Object> call = glowAPI.cancelTask(session, taskId, deviceId);
+        call.enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(Call<Object> call, Response<Object> response) {
+                if (response.isSuccessful()) {
+                    Log.v("res", response.body().toString());
+                } else {
+                    // No Session
+                    Log.v("res", response.body().toString());
+                }
+            }
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+                // something went completely south (like no internet connection)
+                Log.e("Error", t.getMessage());
+            }
+        });
+
     }
 
     @Override
@@ -144,6 +333,7 @@ public class MapViewFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
+
         mMapView.onResume();
     }
 
@@ -242,7 +432,7 @@ public class MapViewFragment extends Fragment
 
         if(mDestination != null){
             GoogleDirection.withServerKey(serverKey)
-                    .from(currLocMarker.getPosition())
+                    .from(mDestination)
                     .to(mDestination)
                     .transportMode(TransportMode.DRIVING)
                     .execute(this);

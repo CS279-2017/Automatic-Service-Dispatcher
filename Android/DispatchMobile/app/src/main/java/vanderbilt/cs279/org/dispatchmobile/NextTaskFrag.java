@@ -54,7 +54,7 @@ public class NextTaskFrag extends Fragment {
 
     // UI elements
     private ProgressBar mTankProgress;
-    private TextView mTaskTitle, mTankProgressWords, mTime;
+    private TextView mTaskTitle, mTankProgressWords, mTime, mWage;
     private ImageView mImage;
     private Button mAcceptButton;
 
@@ -98,6 +98,7 @@ public class NextTaskFrag extends Fragment {
         mTankProgress = (ProgressBar) view.findViewById(R.id.tankProgress);
         mTankProgressWords = (TextView) view.findViewById(R.id.tankProgressWords);
         mTime = (TextView) view.findViewById(R.id.time);
+        mWage = (TextView) view.findViewById(R.id.jobExpectedWage);
         mImage = (ImageView) view.findViewById(R.id.locationImage);
         mAcceptButton = (Button) view.findViewById(R.id.acceptButton);
 
@@ -189,6 +190,9 @@ public class NextTaskFrag extends Fragment {
 
                     mTaskTitle.setText(mCurrentTask.name+" at Pad "+mCurrentTask.sensor);
                     mTime.setText(getTime(mCurrentTask.date));
+                    // @TODO task.getWage()?
+                    mWage.setText("Wage: $"+mCurrentTask.wage);
+
 
                     mTankProgress.setProgress(100*mCurrentTask.levelAtRequest/mCurrentTask.tankCapacity);
                     mTankProgressWords.setText("Tank Level: "+ mCurrentTask.levelAtRequest+" of "+mCurrentTask.tankCapacity);

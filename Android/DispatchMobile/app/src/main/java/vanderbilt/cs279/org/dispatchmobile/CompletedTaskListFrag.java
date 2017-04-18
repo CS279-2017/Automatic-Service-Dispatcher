@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,6 +58,8 @@ public class CompletedTaskListFrag extends ListFragment implements AdapterView.O
     private TasksAdapter mAdapter;
     private ProgressBar mProgressView;
     private ListView mListView;
+    private RecyclerView mRecyclerView;
+
     private ExpandableListView mExpandable;
 
     // Shared Preferences for Session
@@ -195,8 +198,10 @@ public class CompletedTaskListFrag extends ListFragment implements AdapterView.O
             TextView taskName = (TextView) convertView.findViewById(R.id.previousTaskTitle);
             TextView hours = (TextView) convertView.findViewById(R.id.previousTime);
 
+            TextView wage = (TextView) convertView.findViewById(R.id.previousWage);
             taskName.setText(task.name+" at Pad "+task.sensor);
             hours.setText(task.hoursOpen+" hr "+task.minutesOpen+" min");
+            wage.setText("$"+task.wage);
 
             return convertView;
 

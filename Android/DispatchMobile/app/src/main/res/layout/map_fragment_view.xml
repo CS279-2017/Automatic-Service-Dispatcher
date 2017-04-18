@@ -1,11 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    android:id="@+id/main_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/rectangle"
+            android:orientation="vertical">
 
-</RelativeLayout>
+            <TextView
+                android:id="@+id/jobInfo"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="jobInfo"
+                android:textSize="25dp"
+                android:textColor="#2d2d2d"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:background="@drawable/text_view_border"
+                />
+
+            <TextView
+                android:id="@+id/waterVolume"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="waterVolume"
+                android:textSize="25dp"
+                android:textColor="@android:color/holo_red_dark"
+                android:background="@drawable/text_view_border"
+                />
+
+            <TextView
+                android:id="@+id/jobWage"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="jobWage"
+                android:textColor="#b2b2b2"
+                android:textSize="25dp"
+                android:background="@drawable/text_view_border"
+                />
+            <TextView
+                android:id="@+id/jobPinCode"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="PinCode"
+                android:textColor="@android:color/holo_red_light"
+                android:textSize="25dp"
+                android:background="@drawable/text_view_border"
+                />
+        </LinearLayout>
+
+
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            />
+    </LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btn_cancel_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_close"
+        app:backgroundTint="@android:color/holo_orange_light"
+        app:layout_anchor="@+id/mapView"
+        app:layout_anchorGravity="bottom|right|end" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/btn_confirm_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="70dp"
+        android:src="@drawable/ic_confirm"
+        app:layout_anchor="@+id/mapView"
+        app:layout_anchorGravity="bottom|right|end" />
+</android.support.design.widget.CoordinatorLayout>
