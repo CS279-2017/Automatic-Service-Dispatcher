@@ -238,6 +238,9 @@ public class MapViewFragment extends Fragment
                 mWageInfo.setText("$"+mCurrentTask.wage);
                 mDestination = new LatLng(mCurrentTask.lattitude,
                         mCurrentTask.longitude);
+
+                setupDestMarker(mDestination);
+
             } else {
                 // No Session
 
