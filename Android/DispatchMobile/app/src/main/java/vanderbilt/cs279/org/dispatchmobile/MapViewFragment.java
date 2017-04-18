@@ -76,7 +76,7 @@ public class MapViewFragment extends Fragment
     private GoogleMap googleMap;
 
     LatLng mDestination = null;
-    
+
 
     String mWage = "default";
     String mPin = "default";
