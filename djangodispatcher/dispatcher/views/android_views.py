@@ -20,7 +20,11 @@ def get_my_task(request):
         user = Profile.objects.get(session=session)
         user.device = deviceId
         user.save()
-        return JsonResponse(user.current_task())
+        try:
+            task = user.tasks.get(active=True, start_date__isnull=False)
+        except Task.DoesNotExist:
+            return JsonResponse({"result": "bad"}, status=401)
+        return JsonResponse(task.get_json())
     except Profile.DoesNotExist:
         return JsonResponse({"result": "bad"}, status=401)
 
@@ -70,8 +74,8 @@ def cancel_current_task(request):
         user.tasks.remove(task)
         task.save()
         user.save()
-        redelegate(request, {'tag': {'metric': task.skill.title}, 'data': {'sensorID': task.pad.sensorId, 'date': task.date,
-        'waterLevel': task.level_at_request, 'manuallyScheduled': task.manually_scheduled}})
+        redelegate({'tag': {'metric': task.skill.title}, 'data': {'sensorID': task.pad.sensorId, 'date': task.date,
+        'waterLevel': task.level_at_request, 'manuallyScheduled': task.manually_scheduled}}, user.user)
         return JsonResponse({})
     except (Profile.DoesNotExist, Task.DoesNotExist, ValueError):
         return JsonResponse({"result": "bad"}, status=401)
@@ -103,6 +107,11 @@ def complete_task(request):
         task = Task.objects.get(pk=task_id)
         task.active = False
         task.datecompleted = timezone.now()
+        # emptied tank
+        task.pad.water_level = 0
+        task.pad.save()
+        # record amount hauled
+        task.amount_hauled = task.level_at_request
         task.save()
         mytask = []
         for task in user.task_set.all().order_by("-date"):

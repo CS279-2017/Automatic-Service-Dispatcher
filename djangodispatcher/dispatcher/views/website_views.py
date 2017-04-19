@@ -114,9 +114,9 @@ data: {sensorID; sensorID,
 @csrf_exempt
 def delegate(request):
     sample_data = request.body
-    return redelegate(request, json.loads(sample_data))
+    return redelegate(json.loads(sample_data), request.user)
 
-def redelegate(request, body):
+def redelegate(body, userobj):
     # sample_data = request.body
     # TODO: take into account if a user is already at that location
     # TODO: python 3 receives 'bytes' instead of string, so data needs to be decoded
@@ -165,7 +165,7 @@ def redelegate(request, body):
     task.save()
     # return data
     try:
-        user = Profile.objects.get(user=request.user)
+        user = Profile.objects.get(user=userobj)
         return JsonResponse({"users": user.get_my_workers(), "sensors": user.get_pads()})
     except Profile.DoesNotExist:
         return JsonResponse({"result": "success", 'name': task.skill.name, 'date': task.date, 'taskId': task.pk})

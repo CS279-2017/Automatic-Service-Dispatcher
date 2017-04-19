@@ -238,9 +238,11 @@ public class MapViewFragment extends Fragment
                 mWageInfo.setText("$"+mCurrentTask.wage);
                 mDestination = new LatLng(mCurrentTask.lattitude,
                         mCurrentTask.longitude);
-
-                setupDestMarker(mDestination);
-
+                Log.e("Error", response.body().toString());
+                //Sam Added
+                if(currLocMarker != null){
+                    setupDestMarker(mDestination);
+                }
             } else {
                 // No Session
 
@@ -382,6 +384,7 @@ public class MapViewFragment extends Fragment
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
                 currLocMarker = googleMap.addMarker(markerOptions);
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,11));
+
             }
 
             if(mDestination != null){
