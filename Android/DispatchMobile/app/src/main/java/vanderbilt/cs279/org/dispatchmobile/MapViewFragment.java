@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.akexorcist.googledirection.DirectionCallback;
@@ -100,6 +101,8 @@ public class MapViewFragment extends Fragment
     FloatingActionButton mBtn_Cancel;
     FloatingActionButton mBtn_Confirm;
     TextView mJobLocation, mVolume, mWageInfo, mPinCode;
+    LinearLayout mTaskInfoLinearLayout;
+
 
     private GoogleMap googleMap;
 
@@ -154,7 +157,7 @@ public class MapViewFragment extends Fragment
 
         mBtn_Cancel = (FloatingActionButton) rootView.findViewById(R.id.btn_cancel_task);
         mBtn_Confirm = (FloatingActionButton) rootView.findViewById(R.id.btn_confirm_task);
-
+        mTaskInfoLinearLayout = (LinearLayout) rootView.findViewById(R.id.taskInfoLinearLayout);
 
         if(!sessionId.equals("N/A")){
             checkCurrentTask(sessionId, deviceId);
@@ -245,7 +248,7 @@ public class MapViewFragment extends Fragment
                 }
             } else {
                 // No Session
-
+                mTaskInfoLinearLayout.setVisibility(View.GONE);
             }
         }
             @Override
@@ -264,7 +267,8 @@ public class MapViewFragment extends Fragment
             @Override
             public void onResponse(Call<TaskList> call, Response<TaskList> response) {
                 if (response.isSuccessful()) {
-                    Log.v("res", response.body().toString());
+                   // Log.v("res", response.body().toString());
+                    mTaskInfoLinearLayout.setVisibility(View.GONE);
                 } else {
                     // No Session
                     Log.v("res", response.body().toString());
@@ -285,7 +289,8 @@ public class MapViewFragment extends Fragment
             @Override
             public void onResponse(Call<Object> call, Response<Object> response) {
                 if (response.isSuccessful()) {
-                    Log.v("res", response.body().toString());
+                  //  Log.v("res", response.body().toString());
+                    mTaskInfoLinearLayout.setVisibility(View.GONE);
                 } else {
                     // No Session
                     Log.v("res", response.body().toString());

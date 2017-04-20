@@ -153,6 +153,7 @@ public class NextTaskFrag extends Fragment {
         //TODO: only needed for login? if they are logged in to multiple devices this would
         // indicate the current device they are using
         String deviceId = mSharedPreferences.getString(mDeviceId, "N/A");
+        System.out.println(sessionId);
         if(!sessionId.equals("N/A")){
             getNextTask(sessionId, deviceId);
         } else {
@@ -197,9 +198,6 @@ public class NextTaskFrag extends Fragment {
                     mTankProgress.setProgress(100*mCurrentTask.levelAtRequest/mCurrentTask.tankCapacity);
                     mTankProgressWords.setText("Tank Level: "+ mCurrentTask.levelAtRequest+" of "+mCurrentTask.tankCapacity);
 
-                } else {
-                    // No Session
-                    openLoginView();
                 }
             }
 
