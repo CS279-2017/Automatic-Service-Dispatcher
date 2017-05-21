@@ -18,6 +18,7 @@ import math, json, pytz, datetime, decimal
 from random import randint, uniform
 
 
+# opens up a default html page
 @login_required
 def index(request):
     user = Profile.objects.get(user=request.user)
@@ -27,26 +28,26 @@ def index(request):
         return render(request, 'screens/dashboard.html', {})
 
 # Map page
-
+# retrieve sensor
 @login_required
 def get_all_sensors(request):
     user = Profile.objects.get(user=request.user)
     return JsonResponse({"sensors": user.get_pads()})
 
 # Map/Workers Page
-
+# retrieve workers
 @login_required
 def get_all_workers(request):
     user = Profile.objects.get(user=request.user)
     return JsonResponse({"users": user.get_my_workers()})
 
-
+# get current user
 @login_required
 def get_current_user(request):
     user = Profile.objects.get(user=request.user)
     return JsonResponse(user.get_json())
 
-
+# get possible tasks they can accept
 @login_required
 def get_possible_tasks(request):
     user = Profile.objects.get(user=request.user)
@@ -56,12 +57,13 @@ def get_possible_tasks(request):
         my_tasks.append(task.get_json())
     return JsonResponse({'active_tasks': [user.current_task()]})
 
-# TODO implement - change all actives to this in webapp
+# get the current task
 @login_required
 def get_my_task(request):
     user = Profile.objects.get(user=request.user)
     return JsonResponse(user.current_task())
 
+# get completed tasks
 @login_required
 def get_completed_user_tasks(request):
     user = Profile.objects.get(user=request.user)
@@ -71,6 +73,7 @@ def get_completed_user_tasks(request):
     return JsonResponse({'completed_tasks': mytask})
 
 
+# finish a task
 @login_required
 def complete_task(request):
     task_id = request.POST.get('taskId', -1)
@@ -91,6 +94,7 @@ def complete_task(request):
         return JsonResponse({"result": "error"})
 
 '''
+update the passcode for a well
 {sensorID: sensor, passcode: passcode}
 '''
 @login_required
@@ -105,6 +109,7 @@ def update_passcode(request):
     return JsonResponse({"sensors": user.get_pads()})
 
 ''''
+delegate a task (the sensor sends data to this to start a task)
 {tag: { metric: skill needed},
 data: {sensorID; sensorID,
        date: request date,
@@ -181,7 +186,7 @@ def create_sample_task(request):
     return JsonResponse({})
 
 
-
+# chart data
 @login_required
 def get_totals_data(request):
     active = Task.objects.filter(active=True).count()
@@ -192,12 +197,13 @@ def get_totals_data(request):
                          "waterHauled": user.monthly_volume_hauled(), "avgVolume": user.average_water_level_at_request(),
                          "manuallyScheduled": user.monthly_manually_scheduled(), "monthlySpentChart": user.total_spent_on_water_hauling()})
 
-
+# logout
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect('/')
 
 
+# login view
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -219,6 +225,7 @@ def login_view(request):
     return render(request, 'accounts/login.html', {'form': form})
 
 
+# initialize data in database
 def init_2(request):
     wb = openpyxl.load_workbook('dispatcher/views/locations.xlsx')
     wells = []

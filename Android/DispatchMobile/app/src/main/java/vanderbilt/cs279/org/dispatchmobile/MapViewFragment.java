@@ -389,7 +389,6 @@ public class MapViewFragment extends Fragment
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
                 currLocMarker = googleMap.addMarker(markerOptions);
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,11));
-
             }
 
             if(mDestination != null){

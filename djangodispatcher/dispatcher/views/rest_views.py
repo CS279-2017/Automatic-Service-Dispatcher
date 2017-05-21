@@ -8,6 +8,8 @@ from dispatcher.models import Task, Profile, Location, Skill
 from django.utils import timezone
 import datetime, urllib, base64
 
+# These methods are not currently being used
+
 
 @csrf_exempt
 def retrieve_all_data(request):
@@ -15,7 +17,7 @@ def retrieve_all_data(request):
     deviceId = request.POST.get('deviceId', -1)
     try:
         profile = Profile.objects.filter(admin=False)[0]
-        # profile = Profile.objects.get(session=session)
+
         profile.device = deviceId
         profile.save()
     except Profile.DoesNotExist:

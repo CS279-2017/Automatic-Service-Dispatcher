@@ -11,16 +11,16 @@ import datetime, urllib, base64
 from .website_views import redelegate
 
 
-# TODO change name
+# This method queries for any current tasks the user is working on
 @csrf_exempt
 def get_my_task(request):
     session = request.POST.get('session', -1)
     deviceId = request.POST['deviceId']
-    try:
+    try:  # check for logged in user
         user = Profile.objects.get(session=session)
         user.device = deviceId
         user.save()
-        try:
+        try:  # get task that is active and has been started
             task = user.tasks.get(active=True, start_date__isnull=False)
         except Task.DoesNotExist:
             return JsonResponse({"result": "bad"}, status=401)
@@ -28,23 +28,24 @@ def get_my_task(request):
     except Profile.DoesNotExist:
         return JsonResponse({"result": "bad"}, status=401)
 
+# this method queries for any tasks delegated to the user that they have not accepted yet
 @csrf_exempt
 def get_next_task(request):
     session = request.POST.get('session', -1)
     deviceId = request.POST['deviceId']
-    try:
+    try:  # checked for logged in user
         user = Profile.objects.get(session=session)
         user.device = deviceId
         user.save()
 
         images = {}
-        try:
+        try:  # get task that is active but has not been started
             task = user.tasks.get(active=True, start_date__isnull=True)
         except Task.DoesNotExist:
             return JsonResponse({"result": "bad"}, status=401)
 
         intermediate = task.get_json()
-        location = task.pad.location
+        location = task.pad.location  # get thumbnail view of pad location and add to task json
         location = str(location.lat)+","+str(location.longitude)
         try:
             loc = images[location]
@@ -60,6 +61,7 @@ def get_next_task(request):
         return JsonResponse({"result": "bad"}, status=401)
 
 
+# reject task delegated to user
 @csrf_exempt
 def cancel_current_task(request):
     session = request.POST.get('session', -1)
@@ -70,10 +72,10 @@ def cancel_current_task(request):
         user.device = deviceId
         task = Task.objects.get(pk=int(taskId))
         task.start_date = None
-        task.declined_workers.add(user)
-        user.tasks.remove(task)
+        task.declined_workers.add(user)  # add to list of declined workers so they don't recieve it again
+        user.tasks.remove(task) # remove task from their queue
         task.save()
-        user.save()
+        user.save()  # redelegate task
         redelegate({'tag': {'metric': task.skill.title}, 'data': {'sensorID': task.pad.sensorId, 'date': task.date,
         'waterLevel': task.level_at_request, 'manuallyScheduled': task.manually_scheduled}}, user.user)
         return JsonResponse({})
@@ -81,6 +83,7 @@ def cancel_current_task(request):
         return JsonResponse({"result": "bad"}, status=401)
 
 
+# get tasks the user has completed
 @csrf_exempt
 def get_previous_tasks(request):
     session = request.POST.get('session', -1)
@@ -89,7 +92,7 @@ def get_previous_tasks(request):
         user = Profile.objects.get(session=session)
         user.device = deviceId
         user.save()
-        mytask = []
+        mytask = [] # iterate through tasks and get json
         for task in user.tasks.filter(active=False).order_by("-date"):
             intermediate = task.get_json()
             mytask.append(intermediate)
@@ -98,6 +101,7 @@ def get_previous_tasks(request):
         return JsonResponse({"result": "bad"}, status=401)
 
 
+# finish a task
 @csrf_exempt
 def complete_task(request):
     session = request.POST.get('session', -1)
@@ -123,6 +127,7 @@ def complete_task(request):
         return JsonResponse({"result": "error"})
 
 
+# user accepts a task that has been delegated to them
 @csrf_exempt
 def start_task(request):
     session = request.POST.get('session', -1)
@@ -130,10 +135,7 @@ def start_task(request):
     try:
         user = Profile.objects.get(session=session)
         task = Task.objects.get(pk=task_id)
-        # task.active = True
-        # task.start_date = datetime.datetime.now()
-        # user.tasks.add(task)
-        # task.possible_workers.clear()
+        # update start time
         task.start_date = datetime.datetime.today()
         task.save()
         user.save()
@@ -144,17 +146,17 @@ def start_task(request):
         return JsonResponse({"result": "error"})
 
 
+# login for android
 @csrf_exempt
 def android_login(request):
     username = request.POST['username']
     password = request.POST['password']
     deviceId = request.POST['deviceId']
-    print(deviceId)
+
     user = authenticate(username=username, password=password)
     if user is not None:
         login(request, user)
         # Redirect to a success page.
-        print(request.session.session_key)
         profile = Profile.objects.get(user=user)
         profile.session = request.session.session_key
         profile.device = deviceId
@@ -165,6 +167,7 @@ def android_login(request):
         return JsonResponse({"result": "bad"}, status=401)
 
 
+# check session from android to see if they are already logged in
 @csrf_exempt
 def check_session(request):
     session = request.POST.get('session', -1)
@@ -177,7 +180,8 @@ def check_session(request):
     except Profile.DoesNotExist:
         return JsonResponse({"result": "bad"}, status=401)
 
-# TODO: moved
+
+# update the users current location
 @csrf_exempt
 def update_location(request):
     session = request.POST.get('session', -1)
@@ -195,6 +199,7 @@ def update_location(request):
         return JsonResponse({"result": "Error parsing inputs"}, status=401)
 
 
+# get the logged in user's information
 @csrf_exempt
 def get_user(request):
     session = request.POST.get('session', -1)
@@ -204,7 +209,7 @@ def get_user(request):
     except Profile.DoesNotExist:
         return JsonResponse({"result": "Error parsing inputs"}, status=401)
 
-# todo: add ability to remove skills
+# user can update their info (not currently supported)
 @csrf_exempt
 def update_user(request):
     session = request.POST.get('session', -1)
@@ -238,7 +243,7 @@ def update_user(request):
     except Profile.DoesNotExist:
         return JsonResponse({"result": "Error parsing inputs"}, status=401)
 
-
+# android logout
 @csrf_exempt
 def android_logout(request):
     session = request.POST.get('session', -1)
